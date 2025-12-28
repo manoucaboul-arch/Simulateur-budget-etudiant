@@ -6,10 +6,15 @@ Notre projet est un outil interactif qui permet aux étudiant d'estimer automati
 ### On télécharge les bibliothèques
 
 dplyr : manipulation des données (filtrer, trier, calculer)
+
 tidyr : mise en forme des données (réorganiser, nettoyer)
+
 lubridate : gestion des dates (jours, mois, séquences)
+
 ggplot2 : graphiques (courbe du solde, dépenses)
+
 shiny : créer l’application interactive
+
 shinydashboard : mise en page du dashboard
 
 
