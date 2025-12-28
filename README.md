@@ -5,12 +5,10 @@ Notre projet est un outil interactif qui permet aux étudiant d'estimer automati
 
 ### On télécharge les bibliothèques
 
-
-install.packages(c(
   "dplyr",        # manipulation des données
   "tidyr",        # nettoyage et structuration
   "lubridate",    # gestion des dates (indispensable pour simuler un mois)
   "ggplot2",      # graphiques (solde, dépenses)
   "shiny",        # dashboard interactif
   "shinydashboard" # mise en page du dashboard
-))
+
