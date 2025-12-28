@@ -5,15 +5,12 @@ Notre projet est un outil interactif qui permet aux étudiant d'estimer automati
 
 ### On télécharge les bibliothèques
 
-  "dplyr",        # manipulation des données
-  
-  "tidyr"      # nettoyage et structuration
-  
-  "lubridate",    # gestion des dates (indispensable pour simuler un mois)
-  
-  "ggplot2",      # graphiques (solde, dépenses)
-  
-  "shiny",        # dashboard interactif
-  
-  "shinydashboard" # mise en page du dashboard
+dplyr : manipulation des données (filtrer, trier, calculer)
+tidyr : mise en forme des données (réorganiser, nettoyer)
+lubridate : gestion des dates (jours, mois, séquences)
+ggplot2 : graphiques (courbe du solde, dépenses)
+shiny : créer l’application interactive
+shinydashboard : mise en page du dashboard
+
+
 
