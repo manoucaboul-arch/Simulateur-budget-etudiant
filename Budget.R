@@ -1,15 +1,13 @@
 
 
-# -----------------------------
-# Chargement des librairies
-# -----------------------------
+# On commence par charger et installer les bibliothèques déjà installées au préalables. 
 library(dplyr)
 library(tidyr)
 library(lubridate)
 
-# ============================================================
-# 1. Charger les paramètres utilisateur
-# ============================================================
+# Première étape :
+#  On commence par charger les données utilisateurs
+
 charger_parametres <- function(solde_initial,
                                revenus,
                                charges_fixes,
@@ -23,9 +21,10 @@ charger_parametres <- function(solde_initial,
   )
 }
 
-# ============================================================
-# 2. Générer les flux journaliers
-# ============================================================
+# Deuxième étape : 
+# On génère les flux journaliers
+
+
 generer_flux_journaliers <- function(params, date_debut, date_fin) {
   
   # Vérification minimale des colonnes attendues
@@ -59,9 +58,9 @@ generer_flux_journaliers <- function(params, date_debut, date_fin) {
   return(flux)
 }
 
-# ============================================================
-# 3. Simuler le solde jour par jour
-# ============================================================
+# Troisième étape
+# Simuler le solde jour par jour
+
 simuler_solde <- function(flux, solde_initial, date_debut, date_fin) {
   
   dates <- seq.Date(date_debut, date_fin, by = "day")
@@ -81,9 +80,12 @@ simuler_solde <- function(flux, solde_initial, date_debut, date_fin) {
   return(df)
 }
 
-# ============================================================
-# 4. Détecter un risque de découvert
-# ============================================================
+
+# Quatrième étape
+
+#Détecter un risque de découvert
+
+
 detecter_risque <- function(df_solde) {
   
   solde_min <- min(df_solde$solde)
@@ -102,16 +104,10 @@ detecter_risque <- function(df_solde) {
   )
 }
 
-# ============================================================
-# 5.Générer automatiquement les revenus récurrents
-# ============================================================
-# liste_revenus : data.frame avec colonnes :
-#   - montant
-#   - jour (du mois)
-#   - categorie
-# Exemple :
-#   data.frame(montant = 1500, jour = 1, categorie = "salaire")
-# ------------------------------------------------------------
+
+# Cinquième étape
+# On automatise les revenus récurrents
+
 generer_revenus_recurrents <- function(liste_revenus, date_debut, date_fin) {
   
   # Séquence de mois
@@ -139,14 +135,15 @@ generer_revenus_recurrents <- function(liste_revenus, date_debut, date_fin) {
   return(revenus)
 }
 
-# ============================================================
-# 6.Générer automatiquement les charges fixes récurrentes
-# ============================================================
+
+# Sixième étape 
+# Ici on veut générer automatiquement les charges fixes récurrentes
+
 # liste_charges : data.frame avec colonnes :
 #   - montant
 #   - jour
 #   - categorie
-# ------------------------------------------------------------
+
 generer_charges_fixes_recurrentes <- function(liste_charges, date_debut, date_fin) {
   
   mois_seq <- seq(from = as.Date(format(date_debut, "%Y-%m-01")),
@@ -171,3 +168,8 @@ generer_charges_fixes_recurrentes <- function(liste_charges, date_debut, date_fi
     dplyr::filter(date >= date_debut, date <= date_fin)
   
   return(charges)
+
+
+
+
+  # Cette
