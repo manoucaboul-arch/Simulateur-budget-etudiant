@@ -5,32 +5,51 @@ library(tidyr)
 library(lubridate)
 library(ggplot2)
 library(rsconnect)
+
 # ============================================================
-# PARTIE 1 : LES FONCTIONS DE CALCUL (LE "MOTEUR")
+# PARTIE 1 : LES 3 FONCTIONS PILIERS (LE MOTEUR)
 # ============================================================
 
-# Fonction pour transformer un montant mensuel en plusieurs dates
-generer_repetitions <- function(montant, jour_vise, nom, debut, fin, type) {
+# 1. GÉNÉRATEUR AUTOMATISÉ 
+# Transforme une saisie en série de données sur le calendrier
+generer_donnees_temporelles <- function(montant, jour, nom, debut, fin, type) {
+  sequence <- seq(from = as.Date(format(debut, "%Y-%m-01")), 
+                  to = as.Date(format(fin, "%Y-%m-01")), by = "month")
+  mult <- if(type == "depense") -1 else 1
   
-  sequence_mois <- seq(from = as.Date(format(debut, "%Y-%m-01")),
-                       to   = as.Date(format(fin, "%Y-%m-01")),
-                       by   = "month")
+  df <- lapply(sequence, function(m) {
+    d <- as.Date(m)
+    date_flux <- as.Date(format(d, paste0("%Y-%m-", min(jour, days_in_month(d)))))
+    data.frame(date = date_flux, montant = abs(montant) * mult, label = nom)
+  }) %>% bind_rows() 
   
-  multiplicateur <- if(type == "depense") -1 else 1
-  df_final <- data.frame()
+  return(df %>% filter(date >= debut, date <= fin))
+}
+
+# 2. SIMULATEUR DE TRÉSORERIE 
+# Fusionne les flux et calcule le solde cumulé jour par jour
+simuler_evolution_budget <- function(solde_init, debut, fin, flux_auto, flux_imprevus) {
+  calendrier <- data.frame(date = seq.Date(debut, fin, by = "day"))
+  tous_flux <- bind_rows(flux_auto, flux_imprevus) %>% 
+    group_by(date) %>% 
+    summarise(m = sum(montant), .groups = "drop")
   
-  for(m in as.character(sequence_mois)) {
-    date_en_cours <- as.Date(m)
-    jour_reel <- min(jour_vise, days_in_month(date_en_cours))
-    
-    ligne <- data.frame(
-      date = as.Date(format(date_en_cours, paste0("%Y-%m-", jour_reel))),
-      montant = abs(montant) * multiplicateur,
-      label = nom
-    )
-    df_final <- bind_rows(df_final, ligne)
-  }
-  return(df_final %>% filter(date >= debut, date <= fin))
+  res <- calendrier %>% 
+    left_join(tous_flux, by = "date") %>%
+    mutate(m = replace_na(m, 0), 
+           solde = solde_init + cumsum(m))
+  return(res)
+}
+
+# 3. ANALYSEUR DE RISQUE 
+# Extrait les indicateurs de sécurité financière
+analyser_risques_financiers <- function(df_evolution) {
+  point_bas <- min(df_evolution$solde)
+  list(
+    mini = point_bas, 
+    alerte = if(point_bas < 0) "DANGER" else "OK",
+    couleur = if(point_bas < 0) "red" else "green"
+  )
 }
 
 # ============================================================
@@ -38,7 +57,7 @@ generer_repetitions <- function(montant, jour_vise, nom, debut, fin, type) {
 # ============================================================
 ui <- dashboardPage(
   skin = "purple",
-  dashboardHeader(title = "Gestion Budget Emma"),
+  dashboardHeader(title = "Gestion Budget"),
   
   dashboardSidebar(
     h4("Configuration", style="margin-left:15px"),
@@ -60,8 +79,7 @@ ui <- dashboardPage(
     actionButton("bouton_ajout", "Valider", class = "btn-primary", style="width: 80%; margin-left:15px"),
     
     br(), br(),
-    # LE BOUTON REINITIALISER
-    actionButton("bouton_reset", "Réinitialiser les imprévus", class = "btn-danger btn-xs", style="margin-left:15px")
+    actionButton("bouton_reset", "Réinitialiser", class = "btn-danger btn-xs", style="margin-left:15px")
   ),
   
   dashboardBody(
@@ -81,14 +99,13 @@ ui <- dashboardPage(
 )
 
 # ============================================================
-# PARTIE 3 : LE SERVEUR
+# PARTIE 3 : LE SERVEUR (LOGIQUE RÉACTIVE)
 # ============================================================
 server <- function(input, output, session) {
   
-  # Mémoire pour les ajouts manuels (le reactiveVal est comme une boîte vide au début)
+  # Mémoire réactive pour les imprévus
   mes_achats <- reactiveVal(data.frame())
   
-  # Action quand on clique sur Valider
   observeEvent(input$bouton_ajout, {
     if(input$prix_op != 0 && input$nom_op != "") {
       nouveau <- data.frame(
@@ -97,64 +114,51 @@ server <- function(input, output, session) {
         label = input$nom_op
       )
       mes_achats(bind_rows(mes_achats(), nouveau))
-      
-      # On vide les cases après l'ajout pour faire propre
       updateTextInput(session, "nom_op", value = "")
       updateNumericInput(session, "prix_op", value = 0)
     }
   })
   
-  # Action quand on clique sur Réinitialiser
-  observeEvent(input$bouton_reset, {
-    mes_achats(data.frame()) # On remet la boîte à vide
-  })
+  observeEvent(input$bouton_reset, { mes_achats(data.frame()) })
   
-  # Le coeur du calcul réactif
+  # Bloc de calcul central utilisant les 3 fonctions piliers
   calculs <- reactive({
-    sal <- generer_repetitions(input$salaire_r, input$jour_sal_r, "Salaire (Auto)", input$ma_periode_r[1], input$ma_periode_r[2], "revenu")
-    loy <- generer_repetitions(input$loyer_r, input$jour_loy_r, "Loyer (Auto)", input$ma_periode_r[1], input$ma_periode_r[2], "depense")
+    # Utilisation Pilier 1 : Génération des flux fixes
+    sal <- generer_donnees_temporelles(input$salaire_r, input$jour_sal_r, "Salaire", input$ma_periode_r[1], input$ma_periode_r[2], "revenu")
+    loy <- generer_donnees_temporelles(input$loyer_r, input$jour_loy_r, "Loyer", input$ma_periode_r[1], input$ma_periode_r[2], "depense")
+    flux_fixes <- bind_rows(sal, loy)
     
-    tout <- bind_rows(sal, loy, mes_achats()) %>% arrange(date)
+    # Utilisation Pilier 2 : Simulation globale
+    evolution_df <- simuler_evolution_budget(input$mon_solde_r, input$ma_periode_r[1], input$ma_periode_r[2], flux_fixes, mes_achats())
     
-    jours <- data.frame(date = seq.Date(input$ma_periode_r[1], input$ma_periode_r[2], by = "day"))
+    # Utilisation Pilier 3 : Analyse des risques
+    analyse <- analyser_risques_financiers(evolution_df)
     
-    evolution <- jours %>% 
-      left_join(tout %>% group_by(date) %>% summarise(m = sum(montant)), by = "date") %>%
-      mutate(m = replace_na(m, 0), solde = input$mon_solde_r + cumsum(m))
-    
-    return(list(evolution = evolution, table = tout, mini = min(evolution$solde)))
+    return(list(evolution = evolution_df, table = bind_rows(flux_fixes, mes_achats()) %>% arrange(date), analyse = analyse))
   })
   
-  # Graphique principal
+  # Sorties graphiques et indicateurs
   output$graph_principal <- renderPlot({
     ggplot(calculs()$evolution, aes(date, solde)) +
-      geom_line(color="#605ca8", size=1) + 
-      geom_area(fill="#605ca8", alpha=0.2) +
+      geom_line(color="#605ca8", size=1) + geom_area(fill="#605ca8", alpha=0.2) +
       theme_minimal() + labs(x = "Temps", y = "Argent (€)")
   })
   
-  # Camembert simplifié
   output$graph_camembert <- renderPlot({
     depenses <- calculs()$table %>% filter(montant < 0)
     if(nrow(depenses) > 0) {
-      # On agrège par label pour ne pas avoir 50 parts si on a 50 fois 'Courses'
       cam_data <- depenses %>% group_by(label) %>% summarise(total = sum(abs(montant)))
       pie(cam_data$total, labels = cam_data$label, col = terrain.colors(nrow(cam_data)), main = "Où part l'argent")
     }
   })
   
-  # ValueBoxes
   output$box_final <- renderValueBox({ valueBox(paste0(tail(calculs()$evolution$solde, 1), "€"), "Solde final") })
-  output$box_bas <- renderValueBox({ valueBox(paste0(calculs()$mini, "€"), "Point bas", color = "orange") })
+  output$box_bas <- renderValueBox({ valueBox(paste0(calculs()$analyse$mini, "€"), "Point bas", color = "orange") })
   output$box_alerte <- renderValueBox({
-    statut <- if(calculs()$mini < 0) "DANGER" else "OK"
-    valueBox(statut, "Alerte Découvert", color = if(statut == "OK") "green" else "red")
+    valueBox(calculs()$analyse$alerte, "Alerte Découvert", color = calculs()$analyse$couleur)
   })
   
-  # Tableau historique
-  output$table_flux <- renderTable({ 
-    calculs()$table %>% mutate(date = as.character(date)) 
-  })
+  output$table_flux <- renderTable({ calculs()$table %>% mutate(date = as.character(date)) })
 }
 
 shinyApp(ui, server)
