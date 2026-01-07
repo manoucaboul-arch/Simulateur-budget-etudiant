@@ -23,7 +23,8 @@ shinydashboard : mise en page du dashboard
 
 1. Les fonctions motrices de l'application.
 
-''' generer_flux_temporel <- function(liste, date_debut, date_fin, type_flux) {
+''' {r
+generer_flux_temporel <- function(liste, date_debut, date_fin, type_flux) {
   mois_seq <- seq(from = as.Date(format(date_debut, "%Y-%m-01")),
                   to   = as.Date(format(date_fin, "%Y-%m-01")),
                   by   = "month")
