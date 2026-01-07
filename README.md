@@ -49,35 +49,27 @@ filtre les flux pour ne conserver que ceux compris dans l’intervalle demandé.
 Cette fonction n’est pas destinée à être appelée directement par l’utilisateur, mais sert de moteur aux fonctions de plus haut niveau.
 
 
-
-
 * charger_parametres : Centralise et structure toutes les données. Elle prend les diverses informations de l'utilisateur -> Son solde initial, ses revenus, ses charges fixes et dépense variables.
   -> Elle structure les données
    -> Sépare ce qui va être considérer comme débit et comme crédit
 
 
-  
-
 * genere_flux_journalisers : Fonctionne comme un journal de bord et prend les revenus et dépense tout en faisant une chronologie.
  Décidé si un montant est un débit ou un crédit 
 
 
-
-
 * simuler_solde : Fait le travail mathématique et la somme cumulée en prenant la liste crée précédemment et crée un calendrier complet du mois.
-
-
 
 
 * Detecter_risque reregarde le résultat de la simuler_solde est cherche l'erreur.
 Elle déclenche l'alerte si un chiffre est en dessous de zéro et préviens le risque de découvert
 
 
-
-
 *Generer_revenus_ Recurrents & Generer_chargers_fixes_recurrentes automatisent la saisie des données pour éviter d'avoir à taper chaque ligne à chaque fois 
 
-### Architecture 
+
+
+#### Architecture 
 
 Architecture : Le Moteur Temporel
 Le cœur de notre système est une fonction "moteur" interne. Elle permet d'éviter la répétition de code en automatisant la création de dates mensuelles pour n'importe quel type de flux.
@@ -85,16 +77,16 @@ Le cœur de notre système est une fonction "moteur" interne. Elle permet d'évi
 Extrait de code
 
 .generer_flux_temporel <- function(liste, date_debut, date_fin, type_flux) {
-  # Création de la séquence de mois
+  #### Création de la séquence de mois
   
   ''' 
   mois_seq <- seq(from = as.Date(format(date_debut, "%Y-%m-01")),
                   to   = as.Date(format(date_fin, "%Y-%m-01")),
                   by   = "month")'''
   
-  # Application du signe : + pour crédit, - pour débit
+  #### Application du signe : + pour crédit, - pour débit
   multiplicateur <- if(type_flux == "debit") -1 else 1
-  # ... suite du calcul ...
+  #### suite du calcul
 }
 '''
 
