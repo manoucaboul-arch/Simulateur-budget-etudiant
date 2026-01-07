@@ -5,6 +5,11 @@ Notre projet est un outil interactif qui permet aux étudiant d'estimer automati
 2. Visualiser graphiquement les périodes de vulnérabilité
 3. Alerte une alerte automatique en cas de risque de découvert (montant et date)
 
+# Le site est directement disponible par cette adresse 
+
+https://manoucaboul-arch.shinyapps.io/monbudget/
+
+
 ### On télécharge les bibliothèques
 
 dplyr : manipulation des données (filtrer, trier, calculer)
