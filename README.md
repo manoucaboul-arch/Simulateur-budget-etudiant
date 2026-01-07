@@ -23,14 +23,12 @@ shinydashboard : mise en page du dashboard
 
 1. Les fonctions motrices de l'application.
 
-'''
-generer_flux_temporel <- function(liste, date_debut, date_fin, type_flux) {
+''' generer_flux_temporel <- function(liste, date_debut, date_fin, type_flux) {
   mois_seq <- seq(from = as.Date(format(date_debut, "%Y-%m-01")),
                   to   = as.Date(format(date_fin, "%Y-%m-01")),
                   by   = "month")
   multiplicateur <- if(type_flux == "debit") -1 else 1
-}
-'''
+}'''
 
 
 La fonction .generer_flux_temporel() constitue le cœur du système.
@@ -153,10 +151,10 @@ Extrait de code
 Nous allons désormais vous montrer le résultat de la simulation. Le programme génère un graphique de l'évolution du solde avec une ligne rouge d'alerte (abline) située au niveau 0 pour identifier immédiatement les zones critiques.
 
 
-# Affichage du diagnostic final
+#### Affichage du diagnostic final
 '''print(detecter_risque(df_solde))'''
 
-# Tracé du graphique
+### Tracé du graphique
 
 '''plot(df_solde$date, df_solde$solde, type="l", col="blue")
 abline(h=0, col="red", lty=2)'''
