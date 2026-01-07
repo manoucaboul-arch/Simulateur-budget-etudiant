@@ -1,175 +1,160 @@
-
-
-# On commence par charger et installer les bibliothèques déjà installées au préalables. 
+library(shiny)
+library(shinydashboard)
 library(dplyr)
 library(tidyr)
 library(lubridate)
+library(ggplot2)
+library(rsconnect)
+# ============================================================
+# PARTIE 1 : LES FONCTIONS DE CALCUL (LE "MOTEUR")
+# ============================================================
 
-# Première étape :
-#  On commence par charger les données utilisateurs
-
-charger_parametres <- function(solde_initial,
-                               revenus,
-                               charges_fixes,
-                               depenses_variables) {
+# Fonction pour transformer un montant mensuel en plusieurs dates
+generer_repetitions <- function(montant, jour_vise, nom, debut, fin, type) {
   
-  list(
-    solde_initial = solde_initial,
-    revenus = revenus,
-    charges_fixes = charges_fixes,
-    depenses_variables = depenses_variables
-  )
-}
-
-# Deuxième étape : 
-# On génère les flux journaliers
-
-
-generer_flux_journaliers <- function(params, date_debut, date_fin) {
+  sequence_mois <- seq(from = as.Date(format(debut, "%Y-%m-01")),
+                       to   = as.Date(format(fin, "%Y-%m-01")),
+                       by   = "month")
   
-  # Vérification minimale des colonnes attendues
-  check_cols <- function(df, nom) {
-    if (!all(c("date", "montant") %in% names(df))) {
-      stop(paste("Le tableau", nom, "doit contenir au moins : date, montant"))
-    }
-  }
+  multiplicateur <- if(type == "depense") -1 else 1
+  df_final <- data.frame()
   
-  check_cols(params$revenus, "revenus")
-  check_cols(params$charges_fixes, "charges_fixes")
-  check_cols(params$depenses_variables, "depenses_variables")
-  
-  # Revenus
-  revenus <- params$revenus %>%
-    mutate(type = "credit")
-  
-  # Charges fixes
-  charges <- params$charges_fixes %>%
-    mutate(type = "debit")
-  
-  # Dépenses variables
-  depenses_var <- params$depenses_variables %>%
-    mutate(type = "debit")
-  
-  # Fusion
-  flux <- bind_rows(revenus, charges, depenses_var) %>%
-    filter(date >= date_debut, date <= date_fin) %>%
-    arrange(date)
-  
-  return(flux)
-}
-
-# Troisième étape
-# Simuler le solde jour par jour
-
-simuler_solde <- function(flux, solde_initial, date_debut, date_fin) {
-  
-  dates <- seq.Date(date_debut, date_fin, by = "day")
-  base <- data.frame(date = dates)
-  
-  flux_jour <- flux %>%
-    group_by(date) %>%
-    summarise(montant_jour = sum(montant), .groups = "drop")
-  
-  df <- base %>%
-    left_join(flux_jour, by = "date") %>%
-    mutate(
-      montant_jour = ifelse(is.na(montant_jour), 0, montant_jour),
-      solde = solde_initial + cumsum(montant_jour)
+  for(m in as.character(sequence_mois)) {
+    date_en_cours <- as.Date(m)
+    jour_reel <- min(jour_vise, days_in_month(date_en_cours))
+    
+    ligne <- data.frame(
+      date = as.Date(format(date_en_cours, paste0("%Y-%m-", jour_reel))),
+      montant = abs(montant) * multiplicateur,
+      label = nom
     )
-  
-  return(df)
-}
-
-
-# Quatrième étape
-
-#Détecter un risque de découvert
-
-
-detecter_risque <- function(df_solde) {
-  
-  solde_min <- min(df_solde$solde)
-  risque <- ifelse(solde_min < 0, "Découvert", "OK")
-  
-  date_decouvert <- if (risque == "Découvert") {
-    df_solde$date[df_solde$solde < 0][1]
-  } else {
-    NA
+    df_final <- bind_rows(df_final, ligne)
   }
+  return(df_final %>% filter(date >= debut, date <= fin))
+}
+
+# ============================================================
+# PARTIE 2 : L'INTERFACE (UI)
+# ============================================================
+ui <- dashboardPage(
+  skin = "purple",
+  dashboardHeader(title = "Gestion Budget Emma"),
   
-  list(
-    risque = risque,
-    solde_min = solde_min,
-    date_decouvert = date_decouvert
+  dashboardSidebar(
+    h4("Configuration", style="margin-left:15px"),
+    numericInput("mon_solde_r", "Argent au départ (€)", 1200),
+    dateRangeInput("ma_periode_r", "Période d'analyse", start = Sys.Date(), end = Sys.Date() + 120),
+    
+    hr(),
+    h4("Automatique", style="margin-left:15px"),
+    numericInput("salaire_r", "Mon Salaire (€)", 1800),
+    sliderInput("jour_sal_r", "Jour de paye", 1, 31, 1),
+    numericInput("loyer_r", "Mon Loyer (€)", 700),
+    sliderInput("jour_loy_r", "Jour loyer", 1, 31, 5),
+    
+    hr(),
+    h4("Ajouter un imprévu", style="margin-left:15px"),
+    textInput("nom_op", "Libellé", ""),
+    numericInput("prix_op", "Montant (€)", 0),
+    selectInput("type_op", "Type", choices = c("Dépense" = "depense", "Revenu" = "revenu")),
+    actionButton("bouton_ajout", "Valider", class = "btn-primary", style="width: 80%; margin-left:15px"),
+    
+    br(), br(),
+    # LE BOUTON REINITIALISER
+    actionButton("bouton_reset", "Réinitialiser les imprévus", class = "btn-danger btn-xs", style="margin-left:15px")
+  ),
+  
+  dashboardBody(
+    tags$head(tags$script(src = "https://cdn.jsdelivr.net/npm/canvas-confetti@1.5.1/dist/confetti.browser.min.js")),
+    
+    fluidRow(
+      valueBoxOutput("box_final"),
+      valueBoxOutput("box_bas"),
+      valueBoxOutput("box_alerte")
+    ),
+    fluidRow(
+      box(title = "Graphique de Trésorerie", plotOutput("graph_principal"), width = 8),
+      box(title = "Répartition", plotOutput("graph_camembert"), width = 4)
+    ),
+    box(title = "Historique des opérations", tableOutput("table_flux"), width = 12)
   )
+)
+
+# ============================================================
+# PARTIE 3 : LE SERVEUR
+# ============================================================
+server <- function(input, output, session) {
+  
+  # Mémoire pour les ajouts manuels (le reactiveVal est comme une boîte vide au début)
+  mes_achats <- reactiveVal(data.frame())
+  
+  # Action quand on clique sur Valider
+  observeEvent(input$bouton_ajout, {
+    if(input$prix_op != 0 && input$nom_op != "") {
+      nouveau <- data.frame(
+        date = Sys.Date(),
+        montant = if(input$type_op == "depense") -abs(input$prix_op) else abs(input$prix_op),
+        label = input$nom_op
+      )
+      mes_achats(bind_rows(mes_achats(), nouveau))
+      
+      # On vide les cases après l'ajout pour faire propre
+      updateTextInput(session, "nom_op", value = "")
+      updateNumericInput(session, "prix_op", value = 0)
+    }
+  })
+  
+  # Action quand on clique sur Réinitialiser
+  observeEvent(input$bouton_reset, {
+    mes_achats(data.frame()) # On remet la boîte à vide
+  })
+  
+  # Le coeur du calcul réactif
+  calculs <- reactive({
+    sal <- generer_repetitions(input$salaire_r, input$jour_sal_r, "Salaire (Auto)", input$ma_periode_r[1], input$ma_periode_r[2], "revenu")
+    loy <- generer_repetitions(input$loyer_r, input$jour_loy_r, "Loyer (Auto)", input$ma_periode_r[1], input$ma_periode_r[2], "depense")
+    
+    tout <- bind_rows(sal, loy, mes_achats()) %>% arrange(date)
+    
+    jours <- data.frame(date = seq.Date(input$ma_periode_r[1], input$ma_periode_r[2], by = "day"))
+    
+    evolution <- jours %>% 
+      left_join(tout %>% group_by(date) %>% summarise(m = sum(montant)), by = "date") %>%
+      mutate(m = replace_na(m, 0), solde = input$mon_solde_r + cumsum(m))
+    
+    return(list(evolution = evolution, table = tout, mini = min(evolution$solde)))
+  })
+  
+  # Graphique principal
+  output$graph_principal <- renderPlot({
+    ggplot(calculs()$evolution, aes(date, solde)) +
+      geom_line(color="#605ca8", size=1) + 
+      geom_area(fill="#605ca8", alpha=0.2) +
+      theme_minimal() + labs(x = "Temps", y = "Argent (€)")
+  })
+  
+  # Camembert simplifié
+  output$graph_camembert <- renderPlot({
+    depenses <- calculs()$table %>% filter(montant < 0)
+    if(nrow(depenses) > 0) {
+      # On agrège par label pour ne pas avoir 50 parts si on a 50 fois 'Courses'
+      cam_data <- depenses %>% group_by(label) %>% summarise(total = sum(abs(montant)))
+      pie(cam_data$total, labels = cam_data$label, col = terrain.colors(nrow(cam_data)), main = "Où part l'argent")
+    }
+  })
+  
+  # ValueBoxes
+  output$box_final <- renderValueBox({ valueBox(paste0(tail(calculs()$evolution$solde, 1), "€"), "Solde final") })
+  output$box_bas <- renderValueBox({ valueBox(paste0(calculs()$mini, "€"), "Point bas", color = "orange") })
+  output$box_alerte <- renderValueBox({
+    statut <- if(calculs()$mini < 0) "DANGER" else "OK"
+    valueBox(statut, "Alerte Découvert", color = if(statut == "OK") "green" else "red")
+  })
+  
+  # Tableau historique
+  output$table_flux <- renderTable({ 
+    calculs()$table %>% mutate(date = as.character(date)) 
+  })
 }
 
-
-# Cinquième étape
-# On automatise les revenus récurrents
-
-generer_revenus_recurrents <- function(liste_revenus, date_debut, date_fin) {
-  
-  # Séquence de mois
-  mois_seq <- seq(from = as.Date(format(date_debut, "%Y-%m-01")),
-                  to   = as.Date(format(date_fin, "%Y-%m-01")),
-                  by   = "month")
-  
-  revenus <- do.call(rbind, lapply(mois_seq, function(mois) {
-    lapply(1:nrow(liste_revenus), function(i) {
-      date_revenu <- as.Date(sprintf("%s-%02d",
-                                     format(mois, "%Y-%m"),
-                                     liste_revenus$jour[i]))
-      
-      data.frame(
-        date = date_revenu,
-        montant = liste_revenus$montant[i],
-        categorie = liste_revenus$categorie[i]
-      )
-    }) |> do.call(rbind, .)
-  }))
-  
-  revenus <- revenus |> 
-    dplyr::filter(date >= date_debut, date <= date_fin)
-  
-  return(revenus)
-}
-
-
-# Sixième étape 
-# Ici on veut générer automatiquement les charges fixes récurrentes
-
-# liste_charges : data.frame avec colonnes :
-#   - montant
-#   - jour
-#   - categorie
-
-generer_charges_fixes_recurrentes <- function(liste_charges, date_debut, date_fin) {
-  
-  mois_seq <- seq(from = as.Date(format(date_debut, "%Y-%m-01")),
-                  to   = as.Date(format(date_fin, "%Y-%m-01")),
-                  by   = "month")
-  
-  charges <- do.call(rbind, lapply(mois_seq, function(mois) {
-    lapply(1:nrow(liste_charges), function(i) {
-      date_charge <- as.Date(sprintf("%s-%02d",
-                                     format(mois, "%Y-%m"),
-                                     liste_charges$jour[i]))
-      
-      data.frame(
-        date = date_charge,
-        montant = -abs(liste_charges$montant[i]),  # toujours négatif
-        categorie = liste_charges$categorie[i]
-      )
-    }) |> do.call(rbind, .)
-  }))
-  
-  charges <- charges |> 
-    dplyr::filter(date >= date_debut, date <= date_fin)
-  
-  return(charges)
-
-
-
-
-  # Cette
+shinyApp(ui, server)
