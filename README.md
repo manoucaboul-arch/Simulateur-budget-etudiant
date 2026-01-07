@@ -99,10 +99,10 @@ Génération de revenus et charges : Ces fonctions automatisent la répétition 
 
 
 
-# Pour les revenus
+#### Pour les revenus
 rev <- generer_revenus_recurrents(liste_revenus, date_debut, date_fin)
 
-# Pour les charges
+#### Pour les charges
 cha <- generer_charges_fixes_recurrentes(liste_charges, date_debut, date_fin)
 Chargement des paramètres : Cette fonction centralise le solde initial et tous les tableaux de flux dans une structure unique.
 
