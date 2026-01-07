@@ -23,7 +23,8 @@ shinydashboard : mise en page du dashboard
 
 1. Les fonctions motrices de l'application.
 
-'''generer_flux_temporel <- function(liste, date_debut, date_fin, type_flux) {
+'''
+generer_flux_temporel <- function(liste, date_debut, date_fin, type_flux) {
   mois_seq <- seq(from = as.Date(format(date_debut, "%Y-%m-01")),
                   to   = as.Date(format(date_fin, "%Y-%m-01")),
                   by   = "month")
@@ -87,7 +88,9 @@ Extrait de code
 
 .generer_flux_temporel <- function(liste, date_debut, date_fin, type_flux) {
   # Création de la séquence de mois
-  '''mois_seq <- seq(from = as.Date(format(date_debut, "%Y-%m-01")),
+  
+  ''' 
+  mois_seq <- seq(from = as.Date(format(date_debut, "%Y-%m-01")),
                   to   = as.Date(format(date_fin, "%Y-%m-01")),
                   by   = "month")'''
   
@@ -95,12 +98,15 @@ Extrait de code
   multiplicateur <- if(type_flux == "debit") -1 else 1
   # ... suite du calcul ...
 }
+'''
+
 Fonctions Utilisateur (Interface)
 L'utilisateur interagit avec des fonctions simplifiées qui masquent la complexité du moteur interne.
 
 Génération de revenus et charges : Ces fonctions automatisent la répétition des flux sur toute la période demandée.
 
-Extrait de code
+
+
 
 # Pour les revenus
 rev <- generer_revenus_recurrents(liste_revenus, date_debut, date_fin)
@@ -134,10 +140,11 @@ Localisation de l'erreur : Si un risque est détecté, il renvoie la date préci
 
 Extrait de code
 
-detecter_risque <- function(df_solde) {
+''' detecter_risque <- function(df_solde) {
   solde_min <- min(df_solde$solde)
   risque <- ifelse(solde_min < 0, "Découvert", "OK")
 }
+'''
 
 
 ## Démonstration et Visualisation
