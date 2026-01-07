@@ -21,19 +21,21 @@ shinydashboard : mise en page du dashboard
 
 1. Les fonctions motrices de l'application.
 
-   * charger_parametres : Centralise et tructure toutes les données. Elle prend les diverses informations de l'utilisateur -> Son solde initial, ses revenus, ses charges fixes et dépense variables.
+* charger_parametres : Centralise et structure toutes les données. Elle prend les diverses informations de l'utilisateur -> Son solde initial, ses revenus, ses charges fixes et dépense variables.
   -> Elle structure les données
    -> Sépare ce qui va être considérer comme débit et comme crédit
-     
- La fonction  * genere_flux_journalisers * fonctionne comme un journal de bord et prend les revenus et dépense tout en faisant une chronologie.
+
+* genere_flux_journalisers : Fonctionne comme un journal de bord et prend les revenus et dépense tout en faisant une chronologie.
  Décidé si un montant est un débit ou un crédit 
 
-  
-   * simuler_solde est la fonction qui fait le travail mathématique. Elle fait la somme cumulée en prenant la liste crée précédemment et crée un calendrier complet du mois.
 
-   * Detecter_risque reregarde le résultat de la simuler_solde est cherche l'erreur.
+* simuler_solde : Fait le travail mathématique et la somme cumulée en prenant la liste crée précédemment et crée un calendrier complet du mois.
+
+
+* Detecter_risque reregarde le résultat de la simuler_solde est cherche l'erreur.
 Elle déclenche l'alerte si un chiffre est en dessous de zéro et préviens le risque de découvert
 
+*Generer_revenus_ Recurrents & Generer_chargers_fixes_recurrentes automatisent la saisie des données pour éviter d'avoir à taper chaque ligne à chaque fois 
 
 
 
