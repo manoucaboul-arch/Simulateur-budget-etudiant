@@ -4,32 +4,29 @@ library(dplyr)
 library(tidyr)
 library(lubridate)
 library(ggplot2)
-library(rsconnect)
 
-# ============================================================
-# PARTIE 1 : LES 3 FONCTIONS PILIERS (LE MOTEUR)
-# ============================================================
 
-# 1. GÉNÉRATEUR AUTOMATISÉ 
-# Transforme une saisie en série de données sur le calendrier
 generer_donnees_temporelles <- function(montant, jour, nom, debut, fin, type) {
-  sequence <- seq(from = as.Date(format(debut, "%Y-%m-01")), 
-                  to = as.Date(format(fin, "%Y-%m-01")), by = "month")
-  mult <- if(type == "depense") -1 else 1
+  sequence_mois <- seq(from = floor_date(debut, "month"), 
+                       to = floor_date(fin, "month"), by = "month")
   
-  df <- lapply(sequence, function(m) {
-    d <- as.Date(m)
-    date_flux <- as.Date(format(d, paste0("%Y-%m-", min(jour, days_in_month(d)))))
-    data.frame(date = date_flux, montant = abs(montant) * mult, label = nom)
-  }) %>% bind_rows() 
+  jours_max <- days_in_month(sequence_mois)
+  dates_flux <- as.Date(paste0(format(sequence_mois, "%Y-%m-"), pmin(jour, jours_max)))
   
-  return(df %>% filter(date >= debut, date <= fin))
+  res <- tibble(
+    date = dates_flux,
+    montant = abs(montant) * if_else(type == "depense", -1, 1),
+    label = nom
+  )
+  
+  return(res %>% filter(date >= debut, date <= fin))
 }
 
-# 2. SIMULATEUR DE TRÉSORERIE 
-# Fusionne les flux et calcule le solde cumulé jour par jour
+
+
 simuler_evolution_budget <- function(solde_init, debut, fin, flux_auto, flux_imprevus) {
-  calendrier <- data.frame(date = seq.Date(debut, fin, by = "day"))
+  calendrier <- tibble(date = seq.Date(debut, fin, by = "day"))
+  
   tous_flux <- bind_rows(flux_auto, flux_imprevus) %>% 
     group_by(date) %>% 
     summarise(m = sum(montant), .groups = "drop")
@@ -37,80 +34,69 @@ simuler_evolution_budget <- function(solde_init, debut, fin, flux_auto, flux_imp
   res <- calendrier %>% 
     left_join(tous_flux, by = "date") %>%
     mutate(m = replace_na(m, 0), 
-           solde = solde_init + cumsum(m))
+           solde = solde_init + cumsum(m)) 
   return(res)
 }
 
-# 3. ANALYSEUR DE RISQUE 
-# Extrait les indicateurs de sécurité financière
 analyser_risques_financiers <- function(df_evolution) {
-  point_bas <- min(df_evolution$solde)
-  list(
+  point_bas <- min(df_evolution$solde, na.rm = TRUE)
+  # Utilisation de if_else pour la consistance Tidyverse
+  tibble(
     mini = point_bas, 
-    alerte = if(point_bas < 0) "DANGER" else "OK",
-    couleur = if(point_bas < 0) "red" else "green"
+    alerte = if_else(point_bas < 0, "DANGER", "OK"),
+    couleur = if_else(point_bas < 0, "red", "green")
   )
 }
 
-# ============================================================
-# PARTIE 2 : L'INTERFACE (UI)
-# ============================================================
+
 ui <- dashboardPage(
   skin = "purple",
-  dashboardHeader(title = "Gestion Budget"),
+  dashboardHeader(title = "Budget Master"),
   
   dashboardSidebar(
-    h4("Configuration", style="margin-left:15px"),
-    numericInput("mon_solde_r", "Argent au départ (€)", 1200),
-    dateRangeInput("ma_periode_r", "Période d'analyse", start = Sys.Date(), end = Sys.Date() + 120),
+    h4("Paramètres", style="margin-left:15px"),
+    numericInput("mon_solde_r", "Solde initial (€)", 1200),
+    dateRangeInput("ma_periode_r", "Analyse sur", start = Sys.Date(), end = Sys.Date() + 120),
     
     hr(),
-    h4("Automatique", style="margin-left:15px"),
-    numericInput("salaire_r", "Mon Salaire (€)", 1800),
+    h4("Flux Fixes", style="margin-left:15px"),
+    numericInput("salaire_r", "Salaire (€)", 1800),
     sliderInput("jour_sal_r", "Jour de paye", 1, 31, 1),
-    numericInput("loyer_r", "Mon Loyer (€)", 700),
+    numericInput("loyer_r", "Loyer (€)", 700),
     sliderInput("jour_loy_r", "Jour loyer", 1, 31, 5),
     
     hr(),
-    h4("Ajouter un imprévu", style="margin-left:15px"),
-    textInput("nom_op", "Libellé", ""),
+    h4("Nouvel Imprévu", style="margin-left:15px"),
+    textInput("nom_op", "Nom", ""),
     numericInput("prix_op", "Montant (€)", 0),
     selectInput("type_op", "Type", choices = c("Dépense" = "depense", "Revenu" = "revenu")),
-    actionButton("bouton_ajout", "Valider", class = "btn-primary", style="width: 80%; margin-left:15px"),
-    
+    actionButton("bouton_ajout", "Ajouter", class = "btn-primary", style="width: 80%; margin-left:15px"),
     br(), br(),
-    actionButton("bouton_reset", "Réinitialiser", class = "btn-danger btn-xs", style="margin-left:15px")
+    actionButton("bouton_reset", "Reset", class = "btn-danger btn-xs", style="margin-left:15px")
   ),
   
   dashboardBody(
-    tags$head(tags$script(src = "https://cdn.jsdelivr.net/npm/canvas-confetti@1.5.1/dist/confetti.browser.min.js")),
-    
     fluidRow(
       valueBoxOutput("box_final"),
       valueBoxOutput("box_bas"),
       valueBoxOutput("box_alerte")
     ),
     fluidRow(
-      box(title = "Graphique de Trésorerie", plotOutput("graph_principal"), width = 8),
+      box(title = "Évolution de la Trésorerie", plotOutput("graph_principal"), width = 8),
       box(title = "Répartition", plotOutput("graph_camembert"), width = 4)
     ),
-    box(title = "Historique des opérations", tableOutput("table_flux"), width = 12)
+    box(title = "Détail des flux financiers", tableOutput("table_flux"), width = 12)
   )
 )
 
-# ============================================================
-# PARTIE 3 : LE SERVEUR (LOGIQUE RÉACTIVE)
-# ============================================================
+
 server <- function(input, output, session) {
-  
-  # Mémoire réactive pour les imprévus
-  mes_achats <- reactiveVal(data.frame())
-  
+  mes_achats <- reactiveVal(tibble())
   observeEvent(input$bouton_ajout, {
     if(input$prix_op != 0 && input$nom_op != "") {
-      nouveau <- data.frame(
+      nouveau <- tibble(
         date = Sys.Date(),
-        montant = if(input$type_op == "depense") -abs(input$prix_op) else abs(input$prix_op),
+        montant = if_else(input$type_op == "depense", -abs(input$prix_op), abs(input$prix_op)),
         label = input$nom_op
       )
       mes_achats(bind_rows(mes_achats(), nouveau))
@@ -119,44 +105,43 @@ server <- function(input, output, session) {
     }
   })
   
-  observeEvent(input$bouton_reset, { mes_achats(data.frame()) })
+  observeEvent(input$bouton_reset, { mes_achats(tibble()) })
   
-  # Bloc de calcul central utilisant les 3 fonctions piliers
   calculs <- reactive({
-    # Utilisation Pilier 1 : Génération des flux fixes
     sal <- generer_donnees_temporelles(input$salaire_r, input$jour_sal_r, "Salaire", input$ma_periode_r[1], input$ma_periode_r[2], "revenu")
     loy <- generer_donnees_temporelles(input$loyer_r, input$jour_loy_r, "Loyer", input$ma_periode_r[1], input$ma_periode_r[2], "depense")
+    
     flux_fixes <- bind_rows(sal, loy)
-    
-    # Utilisation Pilier 2 : Simulation globale
     evolution_df <- simuler_evolution_budget(input$mon_solde_r, input$ma_periode_r[1], input$ma_periode_r[2], flux_fixes, mes_achats())
-    
-    # Utilisation Pilier 3 : Analyse des risques
     analyse <- analyser_risques_financiers(evolution_df)
     
-    return(list(evolution = evolution_df, table = bind_rows(flux_fixes, mes_achats()) %>% arrange(date), analyse = analyse))
+    list(
+      evolution = evolution_df, 
+      table = bind_rows(flux_fixes, mes_achats()) %>% arrange(date), 
+      analyse = analyse
+    )
   })
   
-  # Sorties graphiques et indicateurs
   output$graph_principal <- renderPlot({
     ggplot(calculs()$evolution, aes(date, solde)) +
-      geom_line(color="#605ca8", size=1) + geom_area(fill="#605ca8", alpha=0.2) +
-      theme_minimal() + labs(x = "Temps", y = "Argent (€)")
+      geom_line(color="#605ca8", size=1.2) + 
+      geom_area(fill="#605ca8", alpha=0.1) +
+      theme_minimal() + labs(x = NULL, y = "Solde Disponibles (€)")
   })
   
   output$graph_camembert <- renderPlot({
     depenses <- calculs()$table %>% filter(montant < 0)
     if(nrow(depenses) > 0) {
       cam_data <- depenses %>% group_by(label) %>% summarise(total = sum(abs(montant)))
-      pie(cam_data$total, labels = cam_data$label, col = terrain.colors(nrow(cam_data)), main = "Où part l'argent")
+      ggplot(cam_data, aes(x="", y=total, fill=label)) +
+        geom_bar(stat="identity") + coord_polar("y") +
+        theme_void() + labs(fill="Poste")
     }
   })
   
-  output$box_final <- renderValueBox({ valueBox(paste0(tail(calculs()$evolution$solde, 1), "€"), "Solde final") })
-  output$box_bas <- renderValueBox({ valueBox(paste0(calculs()$analyse$mini, "€"), "Point bas", color = "orange") })
-  output$box_alerte <- renderValueBox({
-    valueBox(calculs()$analyse$alerte, "Alerte Découvert", color = calculs()$analyse$couleur)
-  })
+  output$box_final <- renderValueBox({ valueBox(paste0(round(tail(calculs()$evolution$solde, 1), 2), "€"), "Solde Fin de Période") })
+  output$box_bas <- renderValueBox({ valueBox(paste0(round(calculs()$analyse$mini, 2), "€"), "Point le plus bas", color = "orange") })
+  output$box_alerte <- renderValueBox({ valueBox(calculs()$analyse$alerte, "Risque Découvert", color = calculs()$analyse$couleur) })
   
   output$table_flux <- renderTable({ calculs()$table %>% mutate(date = as.character(date)) })
 }
