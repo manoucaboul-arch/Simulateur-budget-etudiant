@@ -1,3 +1,6 @@
+
+# On charge les bibliothèques installées au préalable 
+
 library(shiny)
 library(shinydashboard)
 library(dplyr)
