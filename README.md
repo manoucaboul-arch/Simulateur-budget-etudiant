@@ -12,8 +12,8 @@ L'application s'adresse principalement aux étudiants et jeunes actifs qui souha
 
 ## Aperçu de l'application
 
-![Dashboard principal](img/dashboard.png)
-![Alerte de découvert](img/alerte_decouvert.png)
+![Dashboard principal](dashboard.png)
+![Alerte de découvert](alerte_decouvert.png)
 
 Notre projet est un outil interactif qui permet aux étudiants d'estimer automatiquement leur budget mensuel à partir de données financières. Le programme simule l'évolution du solde jour par jour, détecte les risques de découvert et propose une visualisation claire et pédagogique de la situation financière dans un dashboard.
 
