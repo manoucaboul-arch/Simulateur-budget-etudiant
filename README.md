@@ -2,24 +2,23 @@
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 
-> Application Shiny pour simuler et visualiser l’évolution du budget étudiant.
+> Application Shiny pour simuler et visualiser l'évolution du budget étudiant.
 
 ## Contexte
 
-De nombreux étudiants ont du mal à anticiper leur trésorerie mensuelle et découvrent trop tard les risques de découvert.  
-Ce projet a été développé dans le cadre d’un travail universitaire afin de proposer un outil simple qui simule, jour par jour, l’évolution du solde en fonction des revenus, des charges fixes et des imprévus.  
-L’application s’adresse principalement aux étudiants et jeunes actifs qui souhaitent mieux piloter leur budget sans utiliser des outils financiers complexes.
+De nombreux étudiants ont du mal à anticiper leur trésorerie mensuelle et découvrent trop tard les risques de découvert.
+Ce projet a été développé dans le cadre d'un travail universitaire afin de proposer un outil simple qui simule, jour par jour, l'évolution du solde en fonction des revenus, des charges fixes et des imprévus.
+L'application s'adresse principalement aux étudiants et jeunes actifs qui souhaitent mieux piloter leur budget sans utiliser des outils financiers complexes.
 
-## Aperçu de l’application 
+## Aperçu de l'application
 
-<!-- À adapter avec tes vraies captures d’écran -->
-![Dashboard principal](./img/dashboard.png)
-![Alerte de découvert](./img/alerte_decouvert.png)
+![Dashboard principal](img/dashboard.png)
+![Alerte de découvert](img/alerte_decouvert.png)
 
 Notre projet est un outil interactif qui permet aux étudiants d'estimer automatiquement leur budget mensuel à partir de données financières. Le programme simule l'évolution du solde jour par jour, détecte les risques de découvert et propose une visualisation claire et pédagogique de la situation financière dans un dashboard.
 
 1. Anticiper son solde bancaire futur en fonction de ses revenus et charges
-2. Visualiser graphiquement les périodes de vulnérabilité  
+2. Visualiser graphiquement les périodes de vulnérabilité
 3. Émet une alerte automatique en cas de risque de découvert (montant et date)
 
 ## Le site est directement disponible
@@ -99,18 +98,49 @@ La fonction identifie le point le plus bas du solde et déclenche une alerte "DA
 - alerte : "DANGER" ou "OK"
 - couleur : "red" ou "green"
 
+### Nouvelles fonctions avancées
+
+#### 4. analyser_depenses()
+
+Analyse statistique des dépenses.
+
+```r
+analyser_depenses(flux_table)
+```
+
+Calcule :
+- moyenne : dépense moyenne
+- mediane : dépense médiane
+- total : total des dépenses
+- nb : nombre de dépenses
+
+#### 5. predire_solde()
+
+Prédiction avec tendance linéaire.
+
+```r
+predire_solde(df_evolution, jours_futurs = 30)
+```
+
+Utilise une régression linéaire pour projeter le solde sur les 30 prochains jours basé sur la tendance actuelle.
+
 ### Interface Shiny
 
 #### Sidebar
+
 - Paramètres généraux : solde initial et période d'analyse
 - Flux fixes : configuration du salaire et loyer
 - Gestion des imprévus : ajout de dépenses/revenus ponctuels
+- **NOUVEAU**: Bouton Export CSV
 - Bouton Reset
 
 #### Dashboard
+
 - 3 Value Boxes : solde final, point le plus bas, alerte de risque
+- **NOUVEAU**: 3 Value Boxes statistiques : dépense moyenne, total dépenses, nombre de dépenses
 - Graphique d'évolution : courbe de trésorerie
 - Graphique camembert : répartition des dépenses
+- **NOUVEAU**: Graphique de prédiction : projection sur 30 jours avec tendance
 - Tableau : liste des flux
 
 ## Utilisation
@@ -125,9 +155,10 @@ shinyApp(ui, server)
 ### Configuration
 
 1. Définir le solde initial
-2. Choisir la période d'analyse  
+2. Choisir la période d'analyse
 3. Configurer les flux fixes (salaire et loyer)
 4. Ajouter des imprévus si besoin
+5. **NOUVEAU**: Exporter les données en CSV si nécessaire
 
 ### Interprétation
 
@@ -135,23 +166,42 @@ shinyApp(ui, server)
 - Zone rouge : découvert détecté
 - Point le plus bas : moment critique
 - Solde final : projection de fin de période
+- **NOUVEAU**: Ligne pointillée orange : prédiction basée sur la tendance
 
 ## Structure du projet
 
 ```
 Simulateur-budget-etudiant/
-├── Budget.R      # Application complète
-└── README.md     # Documentation
+├── Budget.R       # Application complète
+└── README.md      # Documentation
 ```
 
 ## Fonctionnalités
 
+### Fonctionnalités de base
 - Simulation jour par jour du solde bancaire
 - Gestion automatique des flux récurrents
 - Détection automatique des risques de découvert
 - Visualisation graphique interactive
 - Interface Shiny intuitive
 - Adaptation aux mois de 28, 29, 30 ou 31 jours
+
+### Nouvelles fonctionnalités avancées
+
+**Option 1 : Analyse de Dépenses Moyennes**
+- Calcul automatique des statistiques de dépenses
+- Affichage de la moyenne, médiane et total
+- 3 ValueBoxes supplémentaires avec icônes
+
+**Option 2 : Prédiction avec Tendance**
+- Régression linéaire sur les données historiques
+- Projection sur 30 jours futurs
+- Graphique comparé réel vs prédiction
+
+**Option 3 : Export CSV**
+- Bouton de téléchargement dans la sidebar
+- Export complet de l'évolution du solde
+- Format CSV compatible Excel
 
 ## Exemple d'utilisation
 
@@ -165,7 +215,6 @@ Le dashboard affiche l'évolution quotidienne et alerte en cas de risque.
 
 ## Améliorations possibles
 
-- Export des données en CSV
 - Catégories de dépenses personnalisables
 - Statistiques mensuelles
 - Synchronisation bancaire
