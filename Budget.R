@@ -5,6 +5,8 @@ library(dplyr)
 library(tidyr)
 library(lubridate)
 library(ggplot2)
+library(rsconnect)
+rsconnect::deployApp()
 
 generer_donnees_temporelles <- function(montant, jour, nom, debut, fin, type) {
   sequence_mois <- seq(from = floor_date(debut, "month"), 
