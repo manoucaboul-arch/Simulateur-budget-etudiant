@@ -15,7 +15,7 @@ generer_donnees_temporelles <- function(montant, jour, nom, debut, fin, type) {
   
   res <- tibble(
     date = dates_flux,
-    montant = abs(montant) * if_else(type == "depense", -1, 1),
+    montant = abs(montant) * ifelse(type == "depense", -1, 1),
     label = nom
   )
   
@@ -38,11 +38,11 @@ simuler_evolution_budget <- function(solde_init, debut, fin, flux_auto, flux_imp
 
 analyser_risques_financiers <- function(df_evolution) {
   point_bas <- min(df_evolution$solde, na.rm = TRUE)
-  # Utilisation de if_else pour la consistance Tidyverse
+  # Utilisation de ifelse pour la consistance Tidyverse
   tibble(
     mini = point_bas, 
-    alerte = if_else(point_bas < 0, "DANGER", "OK"),
-    couleur = if_else(point_bas < 0, "red", "green")
+    alerte = ifelse(point_bas < 0, "DANGER", "OK"),
+    couleur = ifelse(point_bas < 0, "red", "green")
   )
 }
 
@@ -146,7 +146,7 @@ server <- function(input, output, session) {
     if(input$prix_op != 0 && input$nom_op != "") {
       nouveau <- tibble(
         date = Sys.Date(),
-        montant = if_else(input$type_op == "depense", -abs(input$prix_op), abs(input$prix_op)),
+        montant = ifelse(input$type_op == "depense", -abs(input$prix_op), abs(input$prix_op)),
         label = input$nom_op
       )
       mes_achats(bind_rows(mes_achats(), nouveau))
@@ -189,7 +189,7 @@ server <- function(input, output, session) {
   
   output$graph_principal <- renderPlot({
     ggplot(calculs()$evolution, aes(date, solde)) +
-      geom_line(color="#605ca8", size=1.2) + 
+      geom_line(color="#605ca8", linewidth=1.2) + 
       geom_area(fill="#605ca8", alpha=0.1) +
       theme_minimal() + labs(x = NULL, y = "Solde Disponibles (€)")
   })
