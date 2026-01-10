@@ -232,23 +232,42 @@ Utiliser le format YYYY-MM-DD.
 Vérifier que vous avez entré des données.
 
 
-## Contribution
+## Cont## 🤝 Contribution
 
-Les contributions sont bienvenues !
+Les contributions sont bienvenues ! Voici comment participer au projet :
+5. **Ouvrir une Pull Request**
 
-1. Fork le projet
-2. Créer une branche : `git checkout -b feature/amelioration`
-3. Commit : `git commit -m 'Ajout fonctionnalité X'`
-4. Push : `git push origin feature/amelioration`
-5. Ouvrir une Pull Request
+### Domaines où contribuer
+- 🐛 Correction de bugs
+- ✨ Nouvelles fonctionnalités (ML, recommandations, etc.)
+- 📝 Amélioration de la documentation
+- 🎨 Design de l'interface
 
-## Auteurs
-
+---
+## 👥 Auteurs
 Développé par CABOUL Emma et TCHAKAH Abra
-- Développement et tests
-- Interface utilisateur
-- Documentation
+**Développé par :**
+- **CABOUL Emma** - [@manoucaboul-arch](https://github.com/manoucaboul-arch)
+- **TCHAKAH Abra**
 
-## Licence
+**Contributions :**
+- Tests et validation des calculs financiers
+- Documentation et déploiement de l'application
 
-Ce projet est sous licence MIT - voir le fichier LICENSE pour plus de détails.
+📧 **Contact** : [Ouvrir une issue](https://github.com/manoucaboul-arch/Simulateur-budget-etudiant/issues)
+
+---
+
+## 🙏 Remerciements
+
+Merci aux étudiants qui ont testé l'application et fourni leurs retours pour l'améliorer.
+
+**Si ce projet vous aide, n'hésitez pas à lui donner une ⭐ sur GitHub !**
+## 📄 Licence
+Ce projet est sous licence MIT - voir le fichier [LICENSE](LICENSE) pour plus de détails.
+
+---
+
+<div align="center">
+  <sub>Projet réalisé dans le cadre du Master MPE - Analyse de données avec R</sub>
+</div>
