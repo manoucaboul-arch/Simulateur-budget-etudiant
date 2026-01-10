@@ -231,3 +231,16 @@ Utiliser le format YYYY-MM-DD.
 **Le graphique ne s'affiche pas**
 Vérifier que vous avez entré des données.
 
+
+## Contribution
+
+Ce projet a été développé dans le cadre d'un travail universitaire.
+
+Équipe :
+- Développement et tests
+- Interface utilisateur
+- Documentation
+
+## Licence
+
+Ce projet est sous licence MIT - voir le fichier LICENSE pour plus de détails.
