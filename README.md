@@ -1,6 +1,22 @@
 # Simulateur-budget-etudiant
 
-Notre projet est un outil interactif qui permet aux étudiants d'estimer automatiquement leur budget mensuel à partir de données financières. Le programme simule l'évolution du solde jour par jour, identifie les risques de découvert et visualise les résultats dans un dashboard.
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
+
+> Application Shiny pour simuler et visualiser l’évolution du budget étudiant.
+
+## Contexte 🎯
+
+De nombreux étudiants ont du mal à anticiper leur trésorerie mensuelle et découvrent trop tard les risques de découvert.  
+Ce projet a été développé dans le cadre d’un travail universitaire afin de proposer un outil simple qui simule, jour par jour, l’évolution du solde en fonction des revenus, des charges fixes et des imprévus.  
+L’application s’adresse principalement aux étudiants et jeunes actifs qui souhaitent mieux piloter leur budget sans utiliser des outils financiers complexes.
+
+## Aperçu de l’application 📸
+
+<!-- À adapter avec tes vraies captures d’écran -->
+![Dashboard principal](./img/dashboard.png)
+![Alerte de découvert](./img/alerte_decouvert.png)
+
+Notre projet est un outil interactif qui permet aux étudiants d'estimer automatiquement leur budget mensuel à partir de données financières. Le programme simule l'évolution du solde jour par jour, détecte les risques de découvert et propose une visualisation claire et pédagogique de la situation financière dans un dashboard.
 
 1. Anticiper son solde bancaire futur en fonction de ses revenus et charges
 2. Visualiser graphiquement les périodes de vulnérabilité  
