@@ -252,6 +252,7 @@ Les contributions sont bienvenues ! Voici comment participer au projet :
 **Développé par :**
 - **CABOUL Emma** - [@manoucaboul-arch](https://github.com/manoucaboul-arch)
 - **TCHAKAH Abra** - [@bienvenue2002](https://github.com/bienvenue2002)
+  
 **Contributions :**
 - Tests et validation des calculs financiers
 - Documentation et déploiement de l'application
