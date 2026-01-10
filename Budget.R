@@ -1,13 +1,10 @@
 # On charge les bibliothèques installées au préalable
-install.packages("rsconnect")
 library(shiny)
 library(shinydashboard)
 library(dplyr)
 library(tidyr)
 library(lubridate)
 library(ggplot2)
-library(rsconnect)
-rsconnect::deployApp()
 
 generer_donnees_temporelles <- function(montant, jour, nom, debut, fin, type) {
   sequence_mois <- seq(from = floor_date(debut, "month"), 
