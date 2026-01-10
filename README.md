@@ -234,9 +234,17 @@ Vérifier que vous avez entré des données.
 
 ## Contribution
 
-Ce projet a été développé dans le cadre d'un travail universitaire.
+Les contributions sont bienvenues !
 
-Équipe :
+1. Fork le projet
+2. Créer une branche : `git checkout -b feature/amelioration`
+3. Commit : `git commit -m 'Ajout fonctionnalité X'`
+4. Push : `git push origin feature/amelioration`
+5. Ouvrir une Pull Request
+
+## Auteurs
+
+Développé par CABOUL Emma et TCHAKAH Abra
 - Développement et tests
 - Interface utilisateur
 - Documentation
