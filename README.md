@@ -231,22 +231,3 @@ Utiliser le format YYYY-MM-DD.
 **Le graphique ne s'affiche pas**
 Vérifier que vous avez entré des données.
 
-## Contribution
-
-Les contributions sont bienvenues.
-
-1. Fork le projet
-2. Créer une branche
-3. Commit les changements
-4. Push
-5. Ouvrir une Pull Request
-
-## Licence
-
-Projet sous licence MIT.
-
-## Auteur
-
-Développé par manoucaboul-arch
-
-Merci aux étudiants qui ont testé l'application.
