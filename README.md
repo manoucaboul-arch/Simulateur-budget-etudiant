@@ -1,10 +1,10 @@
 # Simulateur-budget-etudiant
 
-Notre projet est un outil interactif qui permet aux étudiant d'estimer automatiquement leur budget mensuel à partir de donnée financière. Le programme simule l'évolution du solde jour par jour, identifie les risques de découvert et visualise les résultats dans un dashboard.
+Notre projet est un outil interactif qui permet aux étudiants d'estimer automatiquement leur budget mensuel à partir de données financières. Le programme simule l'évolution du solde jour par jour, identifie les risques de découvert et visualise les résultats dans un dashboard.
 
-1. Anticiper son solde bancaire futur en fonction de ses revvenus et charges
+1. Anticiper son solde bancaire futur en fonction de ses revenus et charges
 2. Visualiser graphiquement les périodes de vulnérabilité  
-3. Alerte une alerte automatique en cas de risque de découvert (montant et date)
+3. Émet une alerte automatique en cas de risque de découvert (montant et date)
 
 ## Le site est directement disponible
 
