@@ -1,4 +1,5 @@
 # On charge les bibliothèques installées au préalable
+install.packages("rsconnect")
 library(shiny)
 library(shinydashboard)
 library(dplyr)
