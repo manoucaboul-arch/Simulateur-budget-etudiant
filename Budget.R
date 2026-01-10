@@ -158,6 +158,14 @@ server <- function(input, output, session) {
   observeEvent(input$bouton_reset, { mes_achats(tibble()) })
   
   calculs <- reactive({
+      # Validation des inputs utilisateur
+      validate(
+            need(!is.na(input$mon_solde_r), "Veuillez entrer un solde initial."),
+            need(!is.na(input$salaire_r), "Le montant du salaire est requis."),
+            need(!is.na(input$loyer_r), "Le montant du loyer est requis."),
+            need(input$ma_periode_r[1] < input$ma_periode_r[2], "La date de début doit être avant la date de fin.")
+          )
+    
     sal <- generer_donnees_temporelles(input$salaire_r, input$jour_sal_r, "Salaire", input$ma_periode_r[1], input$ma_periode_r[2], "revenu")
     loy <- generer_donnees_temporelles(input$loyer_r, input$jour_loy_r, "Loyer", input$ma_periode_r[1], input$ma_periode_r[2], "depense")
     
