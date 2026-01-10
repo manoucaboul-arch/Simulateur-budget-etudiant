@@ -238,7 +238,7 @@ server <- function(input, output, session) {
     valueBox(calculs()$stats$nb, "Nombre de Dépenses", icon = icon("list"), color = "teal") 
   })
   
-  output$table_flux <- renderTable({ calculs()$table %>% mutate(date = as.character(date)) })
+  output$table_flux <- renderTable({ calculs()$table %>% mutate(date = as.character(date), montant = paste0(round(montant, 2), " €")) })
   
   # NOUVEAU: Option 3 - Export CSV
   output$export_csv <- downloadHandler(
