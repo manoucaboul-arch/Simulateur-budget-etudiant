@@ -235,7 +235,11 @@ Vérifier que vous avez entré des données.
 ##  Contribution
 
 Les contributions sont bienvenues ! Voici comment participer au projet :
-5. **Ouvrir une Pull Request**
+
+1. **Fork** le projet
+2. **Créer une branche** : `git checkout -b feature/amelioration`
+3. **Commit** vos changements : `git commit -m 'Ajout fonctionnalité X'`
+4. **Push** : `git push origin feature/amelioration`5. **Ouvrir une Pull Request**
 
 ### Domaines où contribuer
 -  Correction de bugs
@@ -245,11 +249,9 @@ Les contributions sont bienvenues ! Voici comment participer au projet :
 
 ---
 ## Auteurs
-Développé par CABOUL Emma et TCHAKAH Abra
 **Développé par :**
 - **CABOUL Emma** - [@manoucaboul-arch](https://github.com/manoucaboul-arch)
-- **TCHAKAH Abra**
-
+- **TCHAKAH Abra** - [@bienvenue2002](https://github.com/bienvenue2002)
 **Contributions :**
 - Tests et validation des calculs financiers
 - Documentation et déploiement de l'application
