@@ -232,19 +232,19 @@ Utiliser le format YYYY-MM-DD.
 Vérifier que vous avez entré des données.
 
 
-## Cont## 🤝 Contribution
+##  Contribution
 
 Les contributions sont bienvenues ! Voici comment participer au projet :
 5. **Ouvrir une Pull Request**
 
 ### Domaines où contribuer
-- 🐛 Correction de bugs
-- ✨ Nouvelles fonctionnalités (ML, recommandations, etc.)
-- 📝 Amélioration de la documentation
-- 🎨 Design de l'interface
+-  Correction de bugs
+-  Nouvelles fonctionnalités (ML, recommandations, etc.)
+-  Amélioration de la documentation
+-  Design de l'interface
 
 ---
-## 👥 Auteurs
+## Auteurs
 Développé par CABOUL Emma et TCHAKAH Abra
 **Développé par :**
 - **CABOUL Emma** - [@manoucaboul-arch](https://github.com/manoucaboul-arch)
@@ -254,16 +254,16 @@ Développé par CABOUL Emma et TCHAKAH Abra
 - Tests et validation des calculs financiers
 - Documentation et déploiement de l'application
 
-📧 **Contact** : [Ouvrir une issue](https://github.com/manoucaboul-arch/Simulateur-budget-etudiant/issues)
+ **Contact** : [Ouvrir une issue](https://github.com/manoucaboul-arch/Simulateur-budget-etudiant/issues)
 
 ---
 
-## 🙏 Remerciements
+## Remerciements
 
 Merci aux étudiants qui ont testé l'application et fourni leurs retours pour l'améliorer.
 
 **Si ce projet vous aide, n'hésitez pas à lui donner une ⭐ sur GitHub !**
-## 📄 Licence
+## Licence
 Ce projet est sous licence MIT - voir le fichier [LICENSE](LICENSE) pour plus de détails.
 
 ---
