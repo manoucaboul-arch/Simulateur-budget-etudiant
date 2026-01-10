@@ -162,3 +162,219 @@ abline(h=0, col="red", lty=2)'''
 
 
 
+
+
+---
+
+## III - Installation
+
+### Prérequis
+- R version 4.0 ou supérieure
+- RStudio (recommandé)
+
+### Installation des packages
+```r
+# Installation des packages nécessaires
+install.packages(c(
+  "dplyr",
+  "tidyr",
+  "lubridate",
+  "ggplot2",
+  "shiny",
+  "shinydashboard"
+))
+```
+
+### Lancement de l'application en local
+```r
+# Cloner le dépôt
+git clone https://github.com/manoucaboul-arch/Simulateur-budget-etudiant.git
+
+# Ouvrir le projet dans RStudio et exécuter
+shiny::runApp()
+```
+
+---
+
+## IV - Guide d'utilisation
+
+### 1. Saisie des données
+- **Solde initial** : Entrez votre solde bancaire de départ
+- **Revenus récurrents** : Bourse, salaire, aide parentale (montant et jour du mois)
+- **Charges fixes** : Loyer, abonnements, transport (montant et jour du mois)
+- **Dépenses variables** : Dépenses ponctuelles avec leurs dates
+
+### 2. Période de simulation
+Sélectionnez la date de début et de fin pour votre prévision budgétaire (ex: du 1er janvier au 31 mars)
+
+### 3. Lecture des résultats
+- **Graphique** : Visualisez l'évolution de votre solde jour par jour
+- **Ligne rouge** : Indique le seuil de découvert (0€)
+- **Alerte** : Si votre solde passe en négatif, le système vous indique la date et le montant du découvert
+
+### Exemple d'utilisation
+```r
+# Exemple de données pour un étudiant type
+solde_initial <- 200
+
+liste_revenus <- data.frame(
+  description = c("Bourse", "Job étudiant"),
+  montant = c(550, 400),
+  jour_mois = c(5, 25)
+)
+
+liste_charges <- data.frame(
+  description = c("Loyer", "Transport", "Forfait mobile"),
+  montant = c(450, 75, 20),
+  jour_mois = c(1, 1, 10)
+)
+
+# Lancer la simulation
+params <- charger_parametres(solde_initial, liste_revenus, liste_charges)
+flux <- generer_flux_journaliers(params, "2026-01-01", "2026-03-31")
+df_solde <- simuler_solde(flux, params$solde_initial, "2026-01-01", "2026-03-31")
+```
+
+---
+
+## V - Structure du projet
+
+```
+Simulateur-budget-etudiant/
+├── app.R                 # Application Shiny principale
+├── README.md            # Documentation
+├── functions/           
+│   ├── generer_flux.R   # Fonctions de génération des flux
+│   ├── simuler_solde.R  # Fonction de simulation
+│   └── detecter_risque.R # Fonction de détection des risques
+└── www/                 # Ressources web (images, CSS)
+```
+
+---
+
+## VI - Fonctionnalités
+
+✅ Simulation jour par jour du solde bancaire  
+✅ Gestion automatique des flux récurrents mensuels  
+✅ Détection automatique des risques de découvert  
+✅ Visualisation graphique interactive  
+✅ Interface utilisateur intuitive avec Shiny  
+✅ Calcul précis avec prise en compte de tous les flux financiers  
+
+---
+
+## VII - Améliorations futures
+
+- 📊 Export des données en CSV/Excel
+- 📧 Notifications par email en cas de découvert prévu
+- 💰 Calcul automatique des frais bancaires
+- 📱 Version mobile responsive améliorée
+- 🎯 Conseils d'épargne personnalisés
+- 📈 Statistiques mensuelles et annuelles
+- 🔄 Synchronisation avec comptes bancaires (API)
+- 🌍 Support multi-devises
+
+---
+
+## VIII - Résolution de problèmes (FAQ)
+
+**Q: L'application ne se lance pas**  
+R: Vérifiez que tous les packages sont installés avec `installed.packages()`. Installez les packages manquants.
+
+**Q: Erreur de date lors de la simulation**  
+R: Assurez-vous que les dates sont au format correct (YYYY-MM-DD) ou utilisez `as.Date()`.
+
+**Q: Le graphique ne s'affiche pas**  
+R: Vérifiez que vous avez bien entré des données de revenus ou charges et que la période est valide.
+
+**Q: Comment modifier mes données après simulation ?**  
+R: Retournez dans les onglets de saisie et modifiez vos informations, puis relancez la simulation.
+
+**Q: Puis-je sauvegarder mes simulations ?**  
+R: Actuellement, l'application fonctionne en mode session. Les données sont réinitialisées à chaque nouvelle session.
+
+---
+
+## IX - Contribution
+
+Les contributions sont les bienvenues ! Pour contribuer :
+
+1. **Fork** le projet
+2. Créez une **branche** pour votre fonctionnalité (`git checkout -b feature/nouvelle-fonctionnalite`)
+3. **Committez** vos changements (`git commit -m 'Ajout: nouvelle fonctionnalité'`)
+4. **Push** vers la branche (`git push origin feature/nouvelle-fonctionnalite`)
+5. Ouvrez une **Pull Request**
+
+### Directives de contribution
+- Respectez le style de code existant
+- Ajoutez des commentaires clairs
+- Testez votre code avant de soumettre
+- Documentez les nouvelles fonctionnalités
+
+---
+
+## X - Licence
+
+Ce projet est sous **licence MIT**. Vous êtes libre de l'utiliser, le modifier et le distribuer.
+
+```
+MIT License
+
+Copyright (c) 2026 manoucaboul-arch
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+```
+
+---
+
+## XI - Auteurs et Remerciements
+
+### Auteur principal
+- **manoucaboul-arch** - *Développeur principal* - [GitHub](https://github.com/manoucaboul-arch)
+
+### Remerciements
+Merci à tous les étudiants qui ont testé l'application et fourni des retours précieux pour l'améliorer. Un remerciement spécial à la communauté R et Shiny pour leurs excellents outils et documentation.
+
+---
+
+## XII - Contact et Support
+
+- **Issues GitHub** : Pour signaler des bugs ou proposer des améliorations, utilisez [GitHub Issues](https://github.com/manoucaboul-arch/Simulateur-budget-etudiant/issues)
+- **Discussions** : Pour poser des questions ou échanger, visitez [GitHub Discussions](https://github.com/manoucaboul-arch/Simulateur-budget-etudiant/discussions)
+
+---
+
+## XIII - Changelog
+
+### Version actuelle
+- ✅ Simulation de budget mensuel
+- ✅ Détection de découvert
+- ✅ Visualisation graphique
+- ✅ Interface Shiny Dashboard
+
+### Versions à venir
+- 🔜 Export des résultats
+- 🔜 Gestion multi-utilisateurs
+- 🔜 API REST
+
+---
+
+**💡 Développé avec ❤️ pour aider les étudiants à mieux gérer leur budget**
+
+**📚 Projet pédagogique - Gestion budgétaire pour étudiants**
