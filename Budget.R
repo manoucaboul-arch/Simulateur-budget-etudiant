@@ -1,4 +1,3 @@
-# On charge les bibliothèques installées au préalable
 library(shiny)
 library(shinydashboard)
 library(dplyr)
@@ -38,7 +37,6 @@ simuler_evolution_budget <- function(solde_init, debut, fin, flux_auto, flux_imp
 
 analyser_risques_financiers <- function(df_evolution) {
   point_bas <- min(df_evolution$solde, na.rm = TRUE)
-  # Utilisation de ifelse pour la consistance Tidyverse
   tibble(
     mini = point_bas, 
     alerte = ifelse(point_bas < 0, "DANGER", "OK"),
@@ -46,7 +44,6 @@ analyser_risques_financiers <- function(df_evolution) {
   )
 }
 
-# NOUVEAU: Option 1 - Analyse des dépenses moyennes
 analyser_depenses <- function(flux_table) {
   depenses <- flux_table %>% filter(montant < 0)
   if(nrow(depenses) == 0) {
@@ -60,13 +57,10 @@ analyser_depenses <- function(flux_table) {
   )
 }
 
-# NOUVEAU: Option 2 - Prédiction avec tendance linéaire
 predire_solde <- function(df_evolution, jours_futurs = 30) {
-  # Régression linéaire simple sur les données existantes
   df_evolution$jour_num <- as.numeric(df_evolution$date - min(df_evolution$date))
   modele <- lm(solde ~ jour_num, data = df_evolution)
   
-  # Projection
   derniere_date <- max(df_evolution$date)
   dates_futures <- seq.Date(derniere_date + 1, derniere_date + jours_futurs, by = "day")
   jours_futurs_num <- as.numeric(dates_futures - min(df_evolution$date))
@@ -100,11 +94,12 @@ ui <- dashboardPage(
     h4("Nouvel Imprévu", style="margin-left:15px"),
     textInput("nom_op", "Nom", ""),
     numericInput("prix_op", "Montant (€)", 0),
+    # AJOUT DE LA DATE POUR L'IMPRÉVU
+    dateInput("date_op", "Date", value = Sys.Date()),
     selectInput("type_op", "Type", choices = c("Dépense" = "depense", "Revenu" = "revenu")),
     actionButton("bouton_ajout", "Ajouter", class = "btn-primary", style="width: 80%; margin-left:15px"),
     br(), br(),
     
-    # NOUVEAU: Option 3 - Export CSV
     downloadButton("export_csv", "Exporter CSV", class = "btn-success", style="width: 80%; margin-left:15px"),
     br(), br(),
     
@@ -118,7 +113,6 @@ ui <- dashboardPage(
       valueBoxOutput("box_alerte")
     ),
     
-    # NOUVEAU: Option 1 - Statistiques des dépenses
     fluidRow(
       valueBoxOutput("box_moy_depense"),
       valueBoxOutput("box_total_depense"),
@@ -130,7 +124,6 @@ ui <- dashboardPage(
       box(title = "Répartition", plotOutput("graph_camembert"), width = 4)
     ),
     
-    # NOUVEAU: Option 2 - Graphique de prédiction
     fluidRow(
       box(title = "Prédiction Tendance (30 jours)", plotOutput("graph_prediction"), width = 12)
     ),
@@ -145,7 +138,7 @@ server <- function(input, output, session) {
   observeEvent(input$bouton_ajout, {
     if(input$prix_op != 0 && input$nom_op != "") {
       nouveau <- tibble(
-        date = Sys.Date(),
+        date = input$date_op,
         montant = ifelse(input$type_op == "depense", -abs(input$prix_op), abs(input$prix_op)),
         label = input$nom_op
       )
@@ -158,13 +151,12 @@ server <- function(input, output, session) {
   observeEvent(input$bouton_reset, { mes_achats(tibble()) })
   
   calculs <- reactive({
-      # Validation des inputs utilisateur
-      validate(
-            need(!is.na(input$mon_solde_r), "Veuillez entrer un solde initial."),
-            need(!is.na(input$salaire_r), "Le montant du salaire est requis."),
-            need(!is.na(input$loyer_r), "Le montant du loyer est requis."),
-            need(input$ma_periode_r[1] < input$ma_periode_r[2], "La date de début doit être avant la date de fin.")
-          )
+    validate(
+      need(!is.na(input$mon_solde_r), "Veuillez entrer un solde initial."),
+      need(!is.na(input$salaire_r), "Le montant du salaire est requis."),
+      need(!is.na(input$loyer_r), "Le montant du loyer est requis."),
+      need(input$ma_periode_r[1] < input$ma_periode_r[2], "La date de début doit être avant la date de fin.")
+    )
     
     sal <- generer_donnees_temporelles(input$salaire_r, input$jour_sal_r, "Salaire", input$ma_periode_r[1], input$ma_periode_r[2], "revenu")
     loy <- generer_donnees_temporelles(input$loyer_r, input$jour_loy_r, "Loyer", input$ma_periode_r[1], input$ma_periode_r[2], "depense")
@@ -173,7 +165,6 @@ server <- function(input, output, session) {
     evolution_df <- simuler_evolution_budget(input$mon_solde_r, input$ma_periode_r[1], input$ma_periode_r[2], flux_fixes, mes_achats())
     analyse <- analyser_risques_financiers(evolution_df)
     
-    # NOUVEAU: Calcul des statistiques et prédictions
     flux_complet <- bind_rows(flux_fixes, mes_achats())
     stats_depenses <- analyser_depenses(flux_complet)
     prediction <- predire_solde(evolution_df)
@@ -194,7 +185,6 @@ server <- function(input, output, session) {
       theme_minimal() + labs(x = NULL, y = "Solde Disponibles (€)")
   })
   
-  # NOUVEAU: Option 2 - Graphique de prédiction
   output$graph_prediction <- renderPlot({
     df_reel <- calculs()$evolution %>% mutate(type = "réel")
     df_pred <- calculs()$prediction
@@ -227,7 +217,6 @@ server <- function(input, output, session) {
   output$box_bas <- renderValueBox({ valueBox(paste0(round(calculs()$analyse$mini, 2), "€"), "Point le plus bas", color = "orange") })
   output$box_alerte <- renderValueBox({ valueBox(calculs()$analyse$alerte, "Risque Découvert", color = calculs()$analyse$couleur) })
   
-  # NOUVEAU: Option 1 - ValueBox des statistiques
   output$box_moy_depense <- renderValueBox({ 
     valueBox(paste0(round(calculs()$stats$moyenne, 2), "€"), "Dépense Moyenne", icon = icon("chart-line"), color = "blue") 
   })
@@ -240,7 +229,6 @@ server <- function(input, output, session) {
   
   output$table_flux <- renderTable({ calculs()$table %>% mutate(date = as.character(date), montant = paste0(round(montant, 2), " €")) })
   
-  # NOUVEAU: Option 3 - Export CSV
   output$export_csv <- downloadHandler(
     filename = function() {
       paste0("budget_", format(Sys.Date(), "%Y%m%d"), ".csv")
