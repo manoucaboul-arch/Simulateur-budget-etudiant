@@ -1,0 +1,458 @@
+---
+title: "Budget Master"
+subtitle: "Application Shiny pour la gestion financière"
+author: "CABOUL Emma & TCHAKAH Abra"
+date: "Janvier 2026"
+output: 
+  powerpoint_presentation:
+    slide_level: 2
+---
+
+{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, warning = FALSE, message = FALSE)
+library(ggplot2)
+library(dplyr)
+library(lubridate)
+
+# Fonction 1
+generer_donnees_temporelles <- function(montant, jour, nom, debut, fin, type) {
+  sequence_mois <- seq(from = floor_date(debut, "month"), to = floor_date(fin, "month"), by = "month")
+  jours_max <- days_in_month(sequence_mois)
+  dates_flux <- as.Date(paste0(format(sequence_mois, "%Y-%m-"), pmin(jour, jours_max)))
+  
+  data.frame(
+    date = dates_flux,
+    montant = abs(montant) * ifelse(type == "depense", -1, 1),
+    label = nom
+  )
+}
+
+# Fonction 2
+simuler_evolution_budget <- function(solde_init, debut, fin, flux_auto, flux_imprevus) {
+  calendrier <- data.frame(date = seq.Date(debut, fin, by = "day"))
+  tous_flux <- rbind(flux_auto, flux_imprevus)
+  tous_flux <- aggregate(montant ~ date, data = tous_flux, FUN = sum)
+  
+  calendrier <- merge(calendrier, tous_flux, by = "date", all.x = TRUE)
+  calendrier$montant[is.na(calendrier$montant)] <- 0
+  calendrier$solde <- solde_init + cumsum(calendrier$montant)
+  
+  return(calendrier)
+}
+
+# Fonction 3
+analyser_risques_financiers <- function(df_evolution) {
+  point_bas <- min(df_evolution$solde, na.rm = TRUE)
+  
+  list(
+    mini = point_bas,
+    alerte = ifelse(point_bas < 0, "DANGER", "OK"),
+    couleur = ifelse(point_bas < 0, "red", "green")
+  )
+}
+
+# Fonction 4
+analyser_depenses <- function(flux_table) {
+  depenses <- flux_table[flux_table$montant < 0, ]
+  
+  list(
+    moyenne = mean(abs(depenses$montant)),
+    mediane = median(abs(depenses$montant)),
+    total = sum(abs(depenses$montant)),
+    nb = nrow(depenses)
+  )
+}
+
+# Fonction 5
+predire_solde <- function(df_evolution, jours_futurs = 30) {
+  modele <- lm(solde ~ as.numeric(date), data = df_evolution)
+  
+  derniere_date <- max(df_evolution$date)
+  dates_futures <- seq.Date(derniere_date + 1, derniere_date + jours_futurs, by = "day")
+  
+  prediction <- data.frame(
+    date = dates_futures,
+    solde = predict(modele, newdata = data.frame(date = dates_futures))
+  )
+  
+  return(prediction)
+}
+
+# Données de démonstration
+solde_init <- 1200
+debut <- as.Date("2026-01-01")
+fin <- as.Date("2026-04-30")
+
+flux_auto <- rbind(
+  generer_donnees_temporelles(1800, 1, "Salaire", debut, fin, "revenu"),
+  generer_donnees_temporelles(700, 5, "Loyer", debut, fin, "depense")
+)
+
+flux_imprevus <- data.frame(
+  date = as.Date("2026-02-15"),
+  montant = -150,
+  label = "Dépense imprévue"
+)
+
+data_demo <- simuler_evolution_budget(solde_init, debut, fin, flux_auto, flux_imprevus)
+
+
+## Plan de Présentation
+
+- Contexte et Problématique
+- Objectifs du Projet
+- Architecture Technique
+- Les 5 Fonctions Principales
+- Interface Utilisateur et Dashboard
+- Démonstration Scénario Étudiant
+- Validation et Robustesse
+- Points Forts et Faiblesses
+- Conclusion
+
+## Contexte et Problématique
+
+*Le défi :*
+
+De nombreux étudiants ont du mal à anticiper leur trésorerie mensuelle et découvrent trop tard les risques de découvert.
+
+*Notre solution :*
+
+Un outil simple qui simule, jour par jour, l'évolution du solde en fonction des revenus, des charges fixes et des imprévus.
+
+*Public cible :*
+
+Étudiants et jeunes actifs souhaitant mieux piloter leur budget sans utiliser des outils financiers complexes.
+
+## Objectifs du Projet
+
+1. Anticiper son solde bancaire futur en fonction de ses revenus et charges
+
+2. Visualiser graphiquement les périodes de vulnérabilité
+
+3. Émettre une alerte automatique en cas de risque de découvert (montant et date)
+
+## Architecture Technique
+
+*Technologie :* Application Shiny (R)
+
+*Structure :*
+
+- Budget.R : Application complète
+- README.md : Documentation
+
+*Bibliothèques :*
+
+- shiny, shinydashboard
+- dplyr, tidyr, lubridate
+- ggplot2
+
+## Fonction 1 : Génération des Flux Temporels
+
+{r, eval=FALSE}
+generer_donnees_temporelles <- function(
+  montant, jour, nom, debut, fin, type
+) {
+  sequence_mois <- seq(from = floor_date(debut, "month"),
+                       to = floor_date(fin, "month"),
+                       by = "month")
+  jours_max <- days_in_month(sequence_mois)
+  dates_flux <- as.Date(paste0(
+    format(sequence_mois, "%Y-%m-"),
+    pmin(jour, jours_max)
+  ))
+}
+
+
+*Points clés :* Gestion automatique des mois de 28, 29, 30 ou 31 jours
+
+## Fonction 2 : Simulation du Budget
+
+{r, eval=FALSE}
+simuler_evolution_budget <- function(
+  solde_init, debut, fin, flux_auto, flux_imprevus
+) {
+  calendrier <- data.frame(date = seq.Date(debut, fin, by = "day"))
+  tous_flux <- rbind(flux_auto, flux_imprevus)
+  
+  calendrier <- merge(calendrier, tous_flux, by = "date", all.x = TRUE)
+  calendrier$solde <- solde_init + cumsum(calendrier$montant)
+}
+
+
+*Innovation :* Utilisation de cumsum pour un calcul efficace
+
+## Fonction 3 : Analyse des Risques
+
+{r, eval=FALSE}
+analyser_risques_financiers <- function(df_evolution) {
+  point_bas <- min(df_evolution$solde, na.rm = TRUE)
+  
+  list(
+    mini = point_bas,
+    alerte = ifelse(point_bas < 0, "DANGER", "OK"),
+    couleur = ifelse(point_bas < 0, "red", "green")
+  )
+}
+
+
+*Résultat :* Retourne 3 indicateurs clés
+
+- mini : Solde minimum atteint
+- alerte : DANGER ou OK
+- couleur : Code couleur pour l'affichage
+
+## Fonction 4 : Analyse des Dépenses
+
+{r, eval=FALSE}
+analyser_depenses <- function(flux_table) {
+  depenses <- flux_table[flux_table$montant < 0, ]
+  
+  list(
+    moyenne = mean(abs(depenses$montant)),
+    mediane = median(abs(depenses$montant)),
+    total = sum(abs(depenses$montant)),
+    nb = nrow(depenses)
+  )
+}
+
+
+*Fonctionnalité avancée :* Calcul automatique des statistiques de dépenses
+
+- Dépense moyenne et médiane
+- Total des dépenses
+- Nombre de transactions
+
+## Fonction 5 : Prédiction du Solde
+
+{r, eval=FALSE}
+predire_solde <- function(df_evolution, jours_futurs = 30) {
+  modele <- lm(solde ~ as.numeric(date), data = df_evolution)
+  
+  derniere_date <- max(df_evolution$date)
+  dates_futures <- seq.Date(derniere_date + 1,
+                            derniere_date + jours_futurs,
+                            by = "day")
+  
+  prediction <- data.frame(
+    date = dates_futures,
+    solde = predict(modele, newdata = data.frame(date = dates_futures))
+  )
+}
+
+
+*Machine Learning :* Régression linéaire pour projeter le solde sur 30 jours
+
+## Interface Utilisateur
+
+*Sidebar :*
+
+- Paramètres généraux : solde initial et période d'analyse
+- Flux fixes : configuration du salaire et loyer
+- Gestion des imprévus : ajout de dépenses/revenus ponctuels
+- Bouton Export CSV
+- Bouton Reset
+
+## Dashboard Principal
+
+*6 Indicateurs Clés (ValueBoxes) :*
+
+- Solde fin de période
+- Point le plus bas
+- Risque de découvert
+- Dépense moyenne
+- Total des dépenses
+- Nombre de dépenses
+
+*3 Graphiques Interactifs :*
+
+- Évolution de la trésorerie (courbe + zone)
+- Répartition des dépenses (camembert)
+- Prédiction sur 30 jours (régression linéaire)
+
+## Démonstration : Scénario Étudiant
+
+*Paramètres de Simulation :*
+
+{r, echo=FALSE}
+params <- data.frame(
+  Element = c("Solde initial", "Salaire mensuel", "Loyer mensuel", 
+              "Dépense imprévue", "Période d'analyse"),
+  Valeur = c("1 200 €", "1 800 € (versé le 1er)", "700 € (prélevé le 5)", 
+             "150 € (le 15 février)", "4 mois (janvier-avril 2026)")
+)
+knitr::kable(params)
+
+
+## Évolution du Solde Bancaire
+
+{r, echo=FALSE, fig.height=4}
+ggplot(data_demo, aes(x = date, y = solde)) +
+  geom_line(color = "#2E86AB", size = 1.2) +
+  geom_area(fill = "#2E86AB", alpha = 0.3) +
+  geom_hline(yintercept = 0, linetype = "dashed", color = "red") +
+  theme_minimal() +
+  labs(title = "Évolution de la Trésorerie",
+       x = "Date", y = "Solde (€)")
+
+
+## Prédiction par Machine Learning
+
+{r, echo=FALSE, fig.height=4}
+prediction <- predire_solde(data_demo, jours_futurs = 30)
+
+ggplot() +
+  geom_line(data = data_demo, aes(x = date, y = solde), 
+            color = "#2E86AB", size = 1.2) +
+  geom_line(data = prediction, aes(x = date, y = solde), 
+            color = "orange", linetype = "dashed", size = 1.2) +
+  theme_minimal() +
+  labs(title = "Prédiction sur 30 Jours",
+       x = "Date", y = "Solde (€)",
+       caption = "Ligne pointillée : prédiction basée sur la tendance")
+
+
+## Tableau de Synthèse
+
+{r, echo=FALSE}
+risques <- analyser_risques_financiers(data_demo)
+tous_flux <- rbind(flux_auto, flux_imprevus)
+stats_dep <- analyser_depenses(tous_flux)
+
+synthese <- data.frame(
+  Metrique = c("Solde final", "Point le plus bas", "Date critique", 
+               "Statut", "Dépense moyenne", "Total dépenses"),
+  Resultat = c(
+    paste(round(tail(data_demo$solde, 1), 0), "€"),
+    paste(round(risques$mini, 0), "€"),
+    format(data_demo$date[which.min(data_demo$solde)], "%d/%m/%Y"),
+    risques$alerte,
+    paste(round(stats_dep$moyenne, 0), "€"),
+    paste(round(stats_dep$total, 0), "€")
+  )
+)
+knitr::kable(synthese)
+
+
+## Répartition des Dépenses
+
+{r, echo=FALSE, fig.height=4}
+repartition <- data.frame(
+  Categorie = c("Loyer", "Autres"),
+  Montant = c(700, 150)
+)
+
+ggplot(repartition, aes(x = "", y = Montant, fill = Categorie)) +
+  geom_bar(stat = "identity", width = 1) +
+  coord_polar("y") +
+  theme_void() +
+  scale_fill_manual(values = c("#FF6B6B", "#4ECDC4")) +
+  labs(title = "Répartition des Dépenses")
+
+
+## Démonstration Live
+
+*Application déployée :*
+
+<https://manoucaboul-arch.shinyapps.io/monbudget/>
+
+*Code source GitHub :*
+
+<https://github.com/manoucaboul-arch/Simulateur-budget-etudiant>
+
+Testez l'application en direct avec vos propres paramètres.
+
+## Robustesse et Validation
+
+*Validation des Entrées Utilisateur :*
+
+{r, eval=FALSE}
+# Calculs protégés
+reactive({
+  validate(
+    need(!is.na(input$solde), 
+         "Veuillez entrer un solde initial."),
+    need(!is.na(input$salaire), 
+         "Le montant du salaire est requis."),
+    need(!is.na(input$loyer), 
+         "Le montant du loyer est requis."),
+    need(input$debut < input$fin, 
+         "La date de début doit être avant la date de fin.")
+  )
+})
+
+
+## Bénéfices de la Validation
+
+*Avantages :*
+
+- Fiabilité des simulations
+- Détection précoce des erreurs
+- Meilleure expérience utilisateur
+- Code maintenable et évolutif
+- Protection contre les entrées invalides
+
+*Tests effectués :*
+
+- Vérification des calculs de solde
+- Gestion des cas limites
+- Cohérence des graphiques avec les données
+
+## Points Forts du Projet
+
+*Pour l'application déployée sur shinyapps.io :*
+
+- Interface intuitive et facile à utiliser
+- Visualisations claires et informatives
+- 5 fonctions complètes et robustes
+- Prédiction du solde futur sur 30 jours
+- Analyse statistique des dépenses
+- Export des données en CSV
+- Alertes visuelles pour les découverts
+- Gratuit et accessible en ligne
+- Code open source sur GitHub
+
+## Faiblesses et Limites
+
+*Limites identifiées :*
+
+- Modèle de prédiction linéaire simple
+- Pas de gestion des dépenses variables détaillées
+- Nécessite une connexion internet
+- Limites de shinyapps.io (25 heures/mois en version gratuite)
+- Pas de sauvegarde automatique des simulations
+- Interface uniquement en français
+- Pas de synchronisation bancaire automatique
+
+## Conclusion
+
+*Réalisations :*
+
+- Application fonctionnelle et déployée
+- 5 fonctions principales implémentées
+- Interface interactive et responsive
+- Documentation complète sur GitHub
+- Validation et tests réussis
+
+*Perspectives d'amélioration :*
+
+- Ajouter des catégories de dépenses personnalisables
+- Améliorer le modèle de prédiction (ML avancé)
+- Créer un système de comptes utilisateurs
+- Synchronisation bancaire
+
+## Questions ?
+
+*Merci pour votre attention !*
+
+*Contacts :*
+
+- CABOUL Emma : manoucaboul-arch
+- TCHAKAH Abra : bienvenue2002
+
+*Ressources :*
+
+- Application : <https://manoucaboul-arch.shinyapps.io/monbudget/>
+- Code source : <https://github.com/manoucaboul-arch/Simulateur-budget-etudiant>
+- Licence : MIT
+- Master MPE - Analyse de données avec R
+```
