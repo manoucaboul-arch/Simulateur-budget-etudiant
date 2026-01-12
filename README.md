@@ -32,7 +32,7 @@ L'application est un outil interactif qui permet aux étudiants d'estimer automa
 
 **Démo disponible** : https://manoucaboul-arch.shinyapps.io/monbudget/
 
-> L'application déployée reflète exactement le code présent dans ce repository.
+> Pour rendre notre projet plus concret, nous avons mis l'application en ligne. Elle s'appuie exactement sur la structure et les fonctions que nous avons partagées dans ce dossier.
 
 ## Installation
 
