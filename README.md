@@ -289,20 +289,6 @@ Adaptation aux mois de 28, 29, 30 ou 31 jours
 - Gestion des erreurs
 - Code optimisé (< 2 sec de réponse)
 
-## Problèmes courants
-
-**L'application ne se lance pas**  
-→ Vérifier que tous les packages sont installés avec `install.packages()`
-
-**Erreur de date**  
-→ Utiliser le format YYYY-MM-DD (ex: 2026-01-15)
-
-**Le graphique ne s'affiche pas**  
-→ Vérifier que vous avez entré au moins un flux (salaire ou loyer)
-
-**La prédiction semble incorrecte**  
-→ La régression linéaire nécessite au moins 7 jours de données
-
 ## Contribution
 
 Les contributions sont bienvenues ! Voici comment participer au projet :
