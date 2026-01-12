@@ -16,7 +16,7 @@ L'application s'adresse principalement aux étudiants et jeunes actifs qui souha
 ![Dashboard principal](dashboard.png)
 ![Prédiction tendance](prediction_tendance.png)
 
-L'application est un outil interactif qui permet aux étudiants d'estimer automatiquement leur budget mensuel à partir de données financières. Le programme simule l'évolution du solde jour par jour, détecte les risques de découvert et propose une visualisation claire et pédagogique de la situation financière dans un dashboard.
+L'application est un outil interactif qui permet aux étudiants d'estimer automatiquement leur budget mensuel à partir de données financières. Le programme simule l'évolution du solde, détecte les risques de découvert et propose une visualisation claire et pédagogique de la situation financière dans un dashboard.
 
 **Fonctionnalités principales :**
 
