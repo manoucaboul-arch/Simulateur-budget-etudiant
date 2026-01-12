@@ -1,19 +1,15 @@
 # Simulateur Budget Étudiant
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
-![R](https://img.shields.io/badge/R-4.0+-blue.svg)
-![Shiny](https://img.shields.io/badge/Shiny-Dashboard-purple.svg)
-![Status](https://img.shields.io/badge/Status-En%20ligne-success.svg)
-
-> Application Shiny pour simuler et visualiser l'évolution du budget étudiant avec prédiction ML et analyse statistique.
+> Application Shiny pour simuler et visualiser l'évolution du budget étudiant.
 
 ## Contexte
 
-De nombreux étudiants ont du mal à suivre leur budget et à anticiper leurs dépenses. Ils découvrent souvent trop tard qu'ils sont en situation de découvert.
-
-Ce projet a été développé dans le cadre d'un travail universitaire en analyse de données et a pour objectif de proposer un outil simple qui simule, jour par jour, l'évolution du solde en fonction des revenus, des charges fixes et des imprévus.
-
+De nombreux étudiants ont du mal à suivre leur budget et anticiper le suivi des dépenses. Ils découvrent souvent trop tard qu'ils sont en situation de découvert.
+Ce projet a été développé dans le cadre d'un travail universitaire en analyse de donnée et à pour objectif et ambition de proposer un outil simple qui simule, jour par jour, l'évolution du solde en fonction des revenus, des charges fixes et des imprévus.
 L'application s'adresse principalement aux étudiants et jeunes actifs qui souhaitent mieux piloter leur budget sans utiliser des outils financiers complexes.
+
+## Aperçu de l'application.
 
 ## Aperçu de l'application
 
@@ -64,11 +60,6 @@ git clone https://github.com/manoucaboul-arch/Simulateur-budget-etudiant.git
 # Ouvrir Budget.R dans RStudio et exécuter
 shinyApp(ui, server)
 ```
-
-## Architecture technique
-
-L'application est construite avec Shiny. Le fichier `Budget.R` (254 lignes) contient toute l'application.
-
 ### Les 5 fonctionnalités principales
 
 Notre application repose sur 5 fonctions clés qui assurent la simulation budgétaire complète :
