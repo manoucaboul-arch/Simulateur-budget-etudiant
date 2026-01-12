@@ -280,7 +280,6 @@ Adaptation aux mois de 28, 29, 30 ou 31 jours
 ### Long terme
 - Application mobile (iOS/Android)
 - Gestion multi-comptes
-- Modèles ML avancés (ARIMA, Prophet)
 
 ## Tests et qualité
 
