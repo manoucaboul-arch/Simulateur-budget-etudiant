@@ -6,8 +6,8 @@
 
 ## Contexte
 
-De nombreux étudiants ont du mal à anticiper leur trésorerie mensuelle et découvrent trop tard les risques de découvert.
-Ce projet a été développé dans le cadre d'un travail universitaire afin de proposer un outil simple qui simule, jour par jour, l'évolution du solde en fonction des revenus, des charges fixes et des imprévus.
+De nombreux étudiants ont du mal à suivre leur budget et anticiper le suivi des dépenses. Ils découvrent souvent trop tard qu'ils sont en situation de découvert.
+Ce projet a été développé dans le cadre d'un travail universitaire en analyse de donnée et à pour objectif et ambition de proposer un outil simple qui simule, jour par jour, l'évolution du solde en fonction des revenus, des charges fixes et des imprévus.
 L'application s'adresse principalement aux étudiants et jeunes actifs qui souhaitent mieux piloter leur budget sans utiliser des outils financiers complexes.
 
 ## Aperçu de l'application
